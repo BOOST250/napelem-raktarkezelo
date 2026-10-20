@@ -91,7 +91,8 @@ h1 { font-size: 20px; margin-bottom: 4px; }
 }
 
 .mezo { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
-.mezo > span { font-size: 12px; font-weight: bold; }
+.mezo > span,
+.mezo > label { font-size: 12px; font-weight: bold; }
 
 .beviteli {
   height: 40px;
@@ -144,20 +145,35 @@ h1 { font-size: 20px; margin-bottom: 4px; }
 /* A „mégis megnyitom” hivatkozás a befejezetlen felülethez. */
 .belepo-info a, .belepo-hiba a { color: inherit; font-weight: 600; }
 
-/* --------- fióksúgó --------- */
+/* --------- jelszó megjelenítése (szem gomb) --------- */
 
-.fiok-sugo {
-  border-top: 1px solid var(--keret);
-  padding: 14px 24px 18px;
-  font-size: 12px;
+.jelszo-doboz { position: relative; }
+.jelszo-doboz .beviteli { padding-right: 44px; }
+.jelszo-mutat {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 42px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--szoveg-halvany);
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
 }
-.fiok-sugo summary { cursor: pointer; font-weight: 600; color: var(--szoveg); }
-.fiok-sugo ul { margin: 10px 0 10px 18px; }
-.fiok-sugo li { margin-bottom: 4px; }
-.fiok-sugo code {
-  font-family: ui-monospace, Consolas, monospace;
-  background: #f3f4f6;
-  border-radius: 4px;
-  padding: 1px 5px;
+.jelszo-mutat:hover { color: var(--szoveg); }
+.jelszo-mutat:focus-visible { outline: none; box-shadow: var(--fokusz); }
+.jelszo-mutat svg[hidden] { display: none; }   /* SVG-re a böngésző nem alkalmazza magától */
+.jelszo-mutat svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

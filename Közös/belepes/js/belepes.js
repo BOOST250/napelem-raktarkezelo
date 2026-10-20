@@ -133,6 +133,23 @@
     infoDoboz.appendChild(link);
   }
 
+  /* ---------------- jelszó megjelenítése ---------------- */
+
+  const jelszoMezo = $('#jelszo');
+  const mutatGomb = $('#jelszo-mutat');
+
+  mutatGomb.addEventListener('click', () => {
+    const latszik = jelszoMezo.type === 'password';
+    jelszoMezo.type = latszik ? 'text' : 'password';
+    mutatGomb.setAttribute('aria-pressed', String(latszik));
+    const felirat = latszik ? 'Jelszó elrejtése' : 'Jelszó megjelenítése';
+    mutatGomb.setAttribute('aria-label', felirat);
+    mutatGomb.title = felirat;
+    mutatGomb.querySelector('.szem-nyitott').toggleAttribute('hidden', latszik);
+    mutatGomb.querySelector('.szem-csukott').toggleAttribute('hidden', !latszik);
+    jelszoMezo.focus();
+  });
+
   /* ---------------- induláskor ---------------- */
 
   if (location.hash === '#kijelentkezve') {

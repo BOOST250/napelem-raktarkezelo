@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/cors.php';
+require_once __DIR__ . '/auth.php';
+kotelezo_bejelentkezes();   // bármelyik bejelentkezett felhasználó
 
 
 require_once __DIR__ . '/../config/database.php';
