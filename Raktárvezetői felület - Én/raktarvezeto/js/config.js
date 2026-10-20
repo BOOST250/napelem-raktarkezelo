@@ -4,10 +4,10 @@ const CONFIG = {
   // Az adatvégpontok mappája (Eszter backendje): parts.php, bins.php,
   // projects.php, project_parts.php, receiving.php.
   // Részletek: README.md → "API-szerződés"
-  API_BASE: 'http://localhost/napelem/api',
+  API_BASE: '/napelem/api',
 
   // A bejelentkezési végpontok mappája (login.php, me.php, logout.php – PHP session).
-  AUTH_BASE: 'http://localhost/napelem/api',
+  AUTH_BASE: '/napelem/api',
 
   // Ezzel a szerepkörrel lehet belépni erre a felületre.
   ENGEDETT_SZEREPKOR: 'warehouse_manager',

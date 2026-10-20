@@ -28,7 +28,7 @@ A felület csak bejelentkezés után érhető el, és csak **raktárvezető** (`
 A demo munkamenet a localStorage-ban van, a „Demo adatok visszaállítása” nem jelentkeztet ki.
 
 **Éles mód** – PHP session (cookie) a 2. fő backendjében (`napelem/auth/Auth.php`):
-- `js/config.js` → `AUTH_BASE` = az auth-végpontok mappája (alapból `http://localhost/napelem/api`).
+- `js/config.js` → `AUTH_BASE` = az auth-végpontok mappája (alapból `/napelem/api`).
 - A frontendet `http://localhost…` címről nyisd meg (pl. XAMPP `htdocs` vagy `localhost:8123`), **ne dupla kattintással** – `file://` alól a böngésző nem küldi el a session-cookie-t.
 - Kezdő felhasználó felvétele: `POST users.php` `{"username":"admin", "password":"…", "role":"warehouse_manager"}` – a jelszó már hash-elve kerül az adatbázisba. A régi, sima szövegként mentett jelszavak is működnek: első belépéskor automatikusan hash-re cserélődnek.
 

@@ -8,3 +8,9 @@ Közös/*.txt
 
 # Helyi eszközbeállítások
 .claude/
+
+# InfinityFree feltöltési csomag (jelszót tartalmazhat)
+feltoltes/
+
+# A szerver adatbázis-jelszava – csak a tárhelyen létezik
+database.local.php

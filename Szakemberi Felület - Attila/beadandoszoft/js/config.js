@@ -9,8 +9,8 @@
 
 const CONFIG = {
   // Eszter api mappája a XAMPP htdocs alatt.
-  API_BASE: 'http://localhost/napelem/api',
-  AUTH_BASE: 'http://localhost/napelem/api',
+  API_BASE: '/napelem/api',
+  AUTH_BASE: '/napelem/api',
 
   // Ehhez a felülethez szakemberi jogosultság kell (users.role).
   ENGEDETT_SZEREPKOR: 'specialist',

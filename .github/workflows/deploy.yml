@@ -1,0 +1,64 @@
+# Automatikus feltöltés InfinityFree-re minden push után a main ágra.
+# A repó mappáiból összerakja a szerveren használt napelem/ szerkezetet,
+# legenerálja a database.local.php-t a GitHub-titkokból, majd FTP-n feltölti
+# (csak a megváltozott fájlokat). Kézzel is indítható: Actions → Run workflow.
+name: Feltöltés InfinityFree-re
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: infinityfree-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Feltöltendő mappa összeállítása
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.FTP_USER }}
+          DB_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for v in DB_HOST DB_NAME DB_USER DB_PASSWORD; do
+            [ -n "${!v}" ] || { echo "Hiányzó GitHub-titok: $v"; exit 1; }
+          done
+
+          P=build/napelem
+          B="Adatbazis + backend - Eszter/napelem"
+          mkdir -p "$P"
+          cp -r "$B/api" "$B/auth" "$B/config" "$P/"
+          cp -r "Közös/belepes" "$P/belepes"
+          cp -r "Szakemberi Felület - Attila/beadandoszoft" "$P/szakember"
+          cp -r "Raktárvezetői felület - Én/raktarvezeto" "$P/raktarvezeto"
+          cp -r "Raktárosi Felület -Ivett" "$P/raktaros"
+          rm -f "$P/raktarvezeto/README.md"
+
+          # var_export: a jelszóban lévő idézőjel vagy $ jel sem rontja el a PHP-t
+          cat > /tmp/gen.php <<'PHP'
+          <?php
+          $c = "<?php\n// Telepítéskor generálva a GitHub-titkokból – ne szerkeszd kézzel.\n";
+          foreach (['host' => 'DB_HOST', 'username' => 'DB_USER', 'password' => 'DB_PASSWORD', 'database' => 'DB_NAME'] as $var => $env) {
+              $c .= '$' . $var . ' = ' . var_export((string) getenv($env), true) . ";\n";
+          }
+          file_put_contents($argv[1], $c);
+          PHP
+          php /tmp/gen.php "$P/config/database.local.php"
+          php -l "$P/config/database.local.php"
+          find "$P" -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
+      - name: FTP-feltöltés
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftpupload.net
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: build/napelem/
+          server-dir: htdocs/napelem/
