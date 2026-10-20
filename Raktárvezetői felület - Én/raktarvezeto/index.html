@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Napelemrendszer – Raktárvezetői felület</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<!-- auth-pending: a felület rejtve marad, amíg a bejelentkezés ellenőrzése tart (app.js) -->
+<body class="auth-pending">
+  <!-- Teljes alkalmazás (a SolarSystem szakemberi felülettel egyező felépítés) -->
+  <div class="app">
+
+    <!-- ========== OLDALSÁV ========== -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">☀</div>
+        <div class="logo-text">
+          <strong>SolarSystem</strong>
+          <span>Raktárkezelés</span>
+        </div>
+      </div>
+
+      <nav class="navigation">
+        <a href="#kezdolap" class="nav-item" data-view="kezdolap" title="Kezdőlap">
+          <span class="nav-icon">⌂</span><span>Kezdőlap</span>
+        </a>
+        <a href="#alkatreszek" class="nav-item" data-view="alkatreszek" title="Alkatrészek">
+          <span class="nav-icon">▤</span><span>Alkatrészek</span>
+        </a>
+        <a href="#bevetelezes" class="nav-item" data-view="bevetelezes" title="Bevételezés">
+          <span class="nav-icon">⇩</span><span>Bevételezés</span>
+        </a>
+        <a href="#rekeszek" class="nav-item" data-view="rekeszek" title="Rekeszek">
+          <span class="nav-icon">▦</span><span>Rekeszek</span>
+        </a>
+        <a href="#hianyzo" class="nav-item" data-view="hianyzo" title="Hiányzó alkatrészek">
+          <span class="nav-icon">⚠</span><span>Hiányzó alkatrészek</span>
+          <span class="nav-badge" id="badge-hianyzo" hidden></span>
+        </a>
+        <a href="#lefoglalt" class="nav-item" data-view="lefoglalt" title="Lefoglalt alkatrészek">
+          <span class="nav-icon">⚑</span><span>Lefoglalt alkatrészek</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <span id="mode-badge" class="mode-badge"></span>
+        <button type="button" id="reset-demo" class="nav-item nav-button" title="Demo adatok visszaállítása" hidden>
+          <span class="nav-icon">↺</span><span>Demo adatok visszaállítása</span>
+        </button>
+        <button type="button" id="logoutButton" class="nav-item nav-button" title="Kijelentkezés">
+          <span class="nav-icon">↪</span><span>Kijelentkezés</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ========== FŐ TARTALOM ========== -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="page-title"></h1>
+          <p id="page-sub"></p>
+        </div>
+        <div class="topbar-right">
+          <div id="page-actions" class="page-actions"></div>
+          <div class="user-info">
+            <div class="user-avatar" id="user-avatar" aria-hidden="true"></div>
+            <div class="user-details">
+              <strong id="user-name"></strong>
+              <span id="user-role"></span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section id="view" class="page"></section>
+    </main>
+  </div>
+
+  <dialog id="modal"></dialog>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/mock.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

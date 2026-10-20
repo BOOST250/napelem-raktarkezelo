@@ -1,0 +1,153 @@
+/* =====================================
+   BEJELENTKEZÉS
+   =====================================
+
+   Saját fájl, mert a style.css .logo / .logo-icon / .primary-button
+   osztályai az oldalsávra vannak szabva (sötét háttér, fehér gomb kék
+   alapon) — itt világos kártyán kellenek. A színeket viszont ugyanabból
+   a :root készletből veszi, amit a style.css definiál.           */
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--background);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.08);
+}
+
+/* ---- fejléc ---- */
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.login-brand-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    background: var(--orange);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+}
+
+.login-brand-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.login-card h1 {
+    font-size: 20px;
+    color: var(--text);
+    margin: 0 0 6px;
+}
+
+.login-lead {
+    font-size: 13px;
+    color: var(--text-light);
+    margin: 0 0 22px;
+}
+
+/* ---- űrlap ---- */
+
+.login-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 18px;
+}
+
+.login-field label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.login-field input {
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 11px 13px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+}
+
+.login-field input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.login-submit {
+    width: 100%;
+    border: none;
+    border-radius: 7px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    color: var(--white);
+    background: var(--primary);
+    cursor: pointer;
+}
+
+.login-submit:hover {
+    background: var(--primary-dark);
+}
+
+.login-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ---- üzenetek ---- */
+
+.login-message {
+    font-size: 13px;
+    border-radius: 7px;
+    padding: 11px 13px;
+    margin-bottom: 18px;
+}
+
+.login-message.error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.login-message.info {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.login-hidden {
+    display: none;
+}
+
+/* ---- lábjegyzet ---- */
+
+.login-note {
+    font-size: 12px;
+    color: var(--text-light);
+    margin: 20px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+}

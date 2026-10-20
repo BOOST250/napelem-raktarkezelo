@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Napelemrendszer - Bejelentkezés</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+
+<body class="login-page">
+
+    <!-- =========================
+         BEJELENTKEZŐ KÁRTYA
+    ========================== -->
+    <main class="login-card">
+
+        <div class="login-brand">
+
+            <div class="login-brand-icon">
+                &#9728;
+            </div>
+
+            <div class="login-brand-text">
+                Napelemrendszer
+            </div>
+
+        </div>
+
+        <h1>Szakemberi felület</h1>
+
+        <p class="login-lead">
+            Jelentkezz be a projektek kezeléséhez.
+        </p>
+
+        <!-- Kijelentkezés utáni visszajelzés, a login.js mutatja meg -->
+        <div id="login-info" class="login-message info login-hidden"></div>
+
+        <!-- Hibaüzenet (rossz jelszó, nincs szerver, nem megfelelő szerepkör) -->
+        <div id="login-error" class="login-message error login-hidden"></div>
+
+        <form id="login-form" novalidate>
+
+            <div class="login-field">
+                <label for="username">Felhasználónév</label>
+                <input type="text" id="username" name="username"
+                       autocomplete="username" required>
+            </div>
+
+            <div class="login-field">
+                <label for="password">Jelszó</label>
+                <input type="password" id="password" name="password"
+                       autocomplete="current-password" required>
+            </div>
+
+            <button type="submit" id="login-submit" class="login-submit">
+                Bejelentkezés
+            </button>
+
+        </form>
+
+        <p class="login-note">
+            Ez a felület csak <strong>szakember</strong> szerepkörrel
+            használható. A raktárvezetői és raktárosi feladatokhoz a
+            saját felületeiken kell bejelentkezni.
+        </p>
+
+    </main>
+
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/login.js"></script>
+
+</body>
+</html>

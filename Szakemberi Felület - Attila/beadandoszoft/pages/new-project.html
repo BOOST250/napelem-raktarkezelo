@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Új projekt - SolarSystem</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css">
+
+    <link
+        rel="stylesheet"
+        href="../css/new-project.css">
+
+</head>
+
+
+<body class="auth-pending">
+
+<div class="app">
+
+
+    <!-- =====================================
+         OLDALSÁV
+    ====================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                ☀
+            </div>
+
+            <div class="logo-text">
+
+                <strong>
+                    SolarSystem
+                </strong>
+
+                <span>
+                    Telepítéskezelő
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a
+                href="../index.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Kezdőlap
+                </span>
+
+            </a>
+
+
+            <a
+                href="projects.html"
+                class="nav-item active">
+
+                <span class="nav-icon">
+                    ▣
+                </span>
+
+                <span>
+                    Projektek
+                </span>
+
+            </a>
+
+
+            <a
+                href="parts.html"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                <span>
+                    Alkatrészek
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a
+                href="#"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⚙
+                </span>
+
+                <span>
+                    Beállítások
+                </span>
+
+            </a>
+
+
+            <button
+                id="logoutButton"
+                class="nav-item logout-button">
+
+                <span class="nav-icon">
+                    ↪
+                </span>
+
+                <span>
+                    Kijelentkezés
+                </span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================
+         FŐ TARTALOM
+    ====================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Új projekt
+                </h1>
+
+                <p>
+                    Új napelemprojekt létrehozása
+                </p>
+
+            </div>
+
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    SZ
+                </div>
+
+                <div class="user-details">
+
+                    <strong id="username">
+                        Szakember
+                    </strong>
+
+                    <span id="userRole">
+                        Szakember
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================
+             ÚJ PROJEKT
+        ====================================== -->
+
+        <section class="new-project-page">
+
+
+            <!-- Vissza -->
+
+            <a
+                href="projects.html"
+                class="back-link">
+
+                ← Vissza a projektekhez
+
+            </a>
+
+
+            <!-- ŰRLAP KÁRTYA -->
+
+            <div class="form-card">
+
+
+                <div class="form-header">
+
+                    <h2>
+                        Új projekt létrehozása
+                    </h2>
+
+                    <p>
+                        Add meg a projekt és az ügyfél alapvető adatait.
+                    </p>
+
+                </div>
+
+
+                <form id="newProjectForm">
+
+
+                    <!-- =================================
+                         PROJEKT ADATAI
+                    ================================== -->
+
+                    <div class="form-section">
+
+                        <div class="section-title">
+
+                            <div class="section-number">
+                                1
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    Projekt adatai
+                                </h3>
+
+                                <p>
+                                    A telepítés helyszíne és rövid leírása
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Helyszín -->
+
+                        <div class="form-group">
+
+                            <label for="location">
+
+                                Helyszín
+
+                                <span class="required">
+                                    *
+                                </span>
+
+                            </label>
+
+                            <input
+                                type="text"
+                                id="location"
+                                name="location"
+                                placeholder="Pl. Zalaegerszeg, Kossuth Lajos utca 12."
+                                required>
+
+                            <span class="input-hint">
+                                A napelemrendszer telepítési címe.
+                            </span>
+
+                        </div>
+
+
+                        <!-- Leírás -->
+
+                        <div class="form-group">
+
+                            <label for="description">
+                                Projekt leírása
+                            </label>
+
+                            <textarea
+                                id="description"
+                                name="description"
+                                rows="5"
+                                placeholder="Írd le röviden a projektet..."></textarea>
+
+                            <span class="input-hint">
+                                Például: családi ház, tető típusa,
+                                különleges körülmények stb.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         ÜGYFÉL ADATAI
+                    ================================== -->
+
+                    <div class="form-section">
+
+                        <div class="section-title">
+
+                            <div class="section-number">
+                                2
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    Ügyfél adatai
+                                </h3>
+
+                                <p>
+                                    A projekthez tartozó ügyfél elérhetőségei
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Ügyfél neve -->
+
+                        <div class="form-group">
+
+                            <label for="customerName">
+
+                                Ügyfél neve
+
+                                <span class="required">
+                                    *
+                                </span>
+
+                            </label>
+
+                            <input
+                                type="text"
+                                id="customerName"
+                                name="customer_name"
+                                placeholder="Pl. Kovács János"
+                                required>
+
+                        </div>
+
+
+                        <!-- E-mail + telefon -->
+
+                        <div class="form-row">
+
+
+                            <div class="form-group">
+
+                                <label for="customerEmail">
+
+                                    E-mail cím
+
+                                    <span class="required">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="customerEmail"
+                                    name="customer_email"
+                                    placeholder="pelda@email.hu"
+                                    required>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="customerPhone">
+
+                                    Telefonszám
+
+                                    <span class="required">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    id="customerPhone"
+                                    name="customer_phone"
+                                    placeholder="+36 30 123 4567"
+                                    required>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         STÁTUSZ
+                    ================================== -->
+
+                    <div class="initial-status">
+
+                        <div class="status-information">
+
+                            <span class="status-icon">
+                                ●
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Kezdeti projektstátusz
+                                </strong>
+
+                                <p>
+                                    Az új projekt automatikusan
+                                    <strong>Új</strong> státusszal jön létre.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <span class="project-status status-new">
+                            Új
+                        </span>
+
+                    </div>
+
+
+                    <!-- =================================
+                         HIBAJELZÉS
+                    ================================== -->
+
+                    <div
+                        id="formError"
+                        class="form-message error-message">
+
+                    </div>
+
+
+                    <!-- =================================
+                         SIKERES MENTÉS
+                    ================================== -->
+
+                    <div
+                        id="formSuccess"
+                        class="form-message success-message">
+
+                    </div>
+
+
+                    <!-- =================================
+                         GOMBOK
+                    ================================== -->
+
+                    <div class="form-actions">
+
+                        <a
+                            href="projects.html"
+                            class="secondary-button">
+
+                            Mégse
+
+                        </a>
+
+
+                        <button
+                            id="submitButton"
+                            type="submit"
+                            class="primary-button">
+
+                            Projekt létrehozása
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/app.js"></script>
+
+<script src="../js/new-project.js"></script>
+
+</body>
+
+</html>

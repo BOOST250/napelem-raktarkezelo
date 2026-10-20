@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Napelemrendszer - Kezdőlap</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="auth-pending">
+
+    <!-- Teljes alkalmazás -->
+    <div class="app">
+
+        <!-- =========================
+             OLDALSÁV
+        ========================== -->
+        <aside class="sidebar">
+
+            <!-- Logo / alkalmazás neve -->
+            <div class="logo">
+                <div class="logo-icon">☀</div>
+
+                <div class="logo-text">
+                    <strong>SolarSystem</strong>
+                    <span>Telepítéskezelő</span>
+                </div>
+            </div>
+
+
+            <!-- Navigáció -->
+            <nav class="navigation">
+
+                <a href="index.html" class="nav-item active">
+                    <span class="nav-icon">⌂</span>
+                    <span>Kezdőlap</span>
+                </a>
+
+                <a href="pages/projects.html" class="nav-item">
+                    <span class="nav-icon">▣</span>
+                    <span>Projektek</span>
+                </a>
+
+                <a href="pages/parts.html" class="nav-item">
+                    <span class="nav-icon">▤</span>
+                    <span>Alkatrészek</span>
+                </a>
+
+            </nav>
+
+
+            <!-- Oldalsáv alsó része -->
+            <div class="sidebar-bottom">
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">⚙</span>
+                    <span>Beállítások</span>
+                </a>
+
+                <button id="logoutButton" class="nav-item logout-button">
+                    <span class="nav-icon">↪</span>
+                    <span>Kijelentkezés</span>
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =========================
+             FŐ TARTALOM
+        ========================== -->
+        <main class="main-content">
+
+            <!-- Felső fejléc -->
+            <header class="topbar">
+
+                <div>
+                    <h1>Kezdőlap</h1>
+                    <p>Üdvözlünk a napelemrendszer-kezelő rendszerben!</p>
+                </div>
+
+
+                <!-- Felhasználó -->
+                <div class="user-info">
+
+                    <div class="user-avatar">
+                        SZ
+                    </div>
+
+                    <div class="user-details">
+                        <strong id="username">Szakember</strong>
+                        <span id="userRole">Szakember</span>
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <!-- Dashboard tartalom -->
+            <section class="dashboard">
+
+                <!-- Üdvözlő kártya -->
+                <div class="welcome-card">
+
+                    <div>
+                        <span class="welcome-label">
+                            NAPELEMPROJEKT-KEZELÉS
+                        </span>
+
+                        <h2>Üdvözöllek!</h2>
+
+                        <p>
+                            Innen kezelheted a projekteket, az alkatrészeket
+                            és a telepítésekhez kapcsolódó feladatokat.
+                        </p>
+
+                        <a href="pages/projects.html" class="primary-button">
+                            Projektek megtekintése
+                        </a>
+                    </div>
+
+                    <div class="welcome-icon">
+                        ☀
+                    </div>
+
+                </div>
+
+
+                <!-- Statisztikai kártyák -->
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon blue">
+                            ▣
+                        </div>
+
+                        <div>
+                            <span class="stat-title">
+                                Összes projekt
+                            </span>
+
+                            <strong id="totalProjects">
+                                12
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon orange">
+                            ◷
+                        </div>
+
+                        <div>
+                            <span class="stat-title">
+                                Folyamatban
+                            </span>
+
+                            <strong id="activeProjects">
+                                4
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon green">
+                            ✓
+                        </div>
+
+                        <div>
+                            <span class="stat-title">
+                                Befejezett
+                            </span>
+
+                            <strong id="completedProjects">
+                                7
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <div class="stat-icon red">
+                            !
+                        </div>
+
+                        <div>
+                            <span class="stat-title">
+                                Sikertelen
+                            </span>
+
+                            <strong id="failedProjects">
+                                1
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Alsó dashboard -->
+                <div class="dashboard-grid">
+
+                    <!-- Gyors műveletek -->
+                    <div class="content-card">
+
+                        <div class="card-header">
+                            <div>
+                                <h3>Gyors műveletek</h3>
+                                <p>Gyakran használt funkciók</p>
+                            </div>
+                        </div>
+
+
+                        <div class="quick-actions">
+
+                            <a href="pages/new-project.html"
+                               class="quick-action">
+
+                                <div class="quick-action-icon">
+                                    +
+                                </div>
+
+                                <div>
+                                    <strong>Új projekt</strong>
+                                    <span>
+                                        Új napelemprojekt létrehozása
+                                    </span>
+                                </div>
+
+                            </a>
+
+
+                            <a href="pages/projects.html"
+                               class="quick-action">
+
+                                <div class="quick-action-icon">
+                                    ▣
+                                </div>
+
+                                <div>
+                                    <strong>Projektek</strong>
+                                    <span>
+                                        Meglévő projektek kezelése
+                                    </span>
+                                </div>
+
+                            </a>
+
+
+                            <a href="pages/parts.html"
+                               class="quick-action">
+
+                                <div class="quick-action-icon">
+                                    ▤
+                                </div>
+
+                                <div>
+                                    <strong>Alkatrészek</strong>
+                                    <span>
+                                        Alkatrészek és készlet megtekintése
+                                    </span>
+                                </div>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Projekt státuszok -->
+                    <div class="content-card">
+
+                        <div class="card-header">
+
+                            <div>
+                                <h3>Projektállapotok</h3>
+                                <p>Aktuális projektek megoszlása</p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="status-list">
+
+                            <div class="status-row">
+                                <span>
+                                    <span class="status-dot new"></span>
+                                    Új
+                                </span>
+
+                                <strong>2</strong>
+                            </div>
+
+
+                            <div class="status-row">
+                                <span>
+                                    <span class="status-dot draft"></span>
+                                    Tervezet
+                                </span>
+
+                                <strong>2</strong>
+                            </div>
+
+
+                            <div class="status-row">
+                                <span>
+                                    <span class="status-dot scheduled"></span>
+                                    Ütemezett
+                                </span>
+
+                                <strong>3</strong>
+                            </div>
+
+
+                            <div class="status-row">
+                                <span>
+                                    <span class="status-dot progress"></span>
+                                    Folyamatban
+                                </span>
+
+                                <strong>4</strong>
+                            </div>
+
+
+                            <div class="status-row">
+                                <span>
+                                    <span class="status-dot completed"></span>
+                                    Befejezett
+                                </span>
+
+                                <strong>7</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>

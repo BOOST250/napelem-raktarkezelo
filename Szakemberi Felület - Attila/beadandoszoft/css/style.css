@@ -1,0 +1,779 @@
+/* =========================
+   ALAPBEÁLLÍTÁSOK
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --sidebar-width: 250px;
+
+    --background: #f5f7fb;
+    --white: #ffffff;
+
+    --text: #1f2937;
+    --text-light: #6b7280;
+
+    --border: #e5e7eb;
+
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+
+    --sidebar: #111827;
+    --sidebar-hover: #1f2937;
+
+    --green: #16a34a;
+    --orange: #f59e0b;
+    --red: #dc2626;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: var(--background);
+    color: var(--text);
+
+    min-height: 100vh;
+}
+
+
+/* =========================
+   APP
+========================= */
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* =========================
+   OLDALSÁV
+========================= */
+
+.sidebar {
+    width: var(--sidebar-width);
+
+    background: var(--sidebar);
+
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+
+/* Logo */
+
+.logo {
+    height: 85px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid #263041;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    background: #f59e0b;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+
+    margin-right: 12px;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-text strong {
+    font-size: 16px;
+}
+
+.logo-text span {
+    color: #9ca3af;
+
+    font-size: 11px;
+
+    margin-top: 3px;
+}
+
+
+/* Navigáció */
+
+.navigation {
+    padding: 25px 14px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    margin-bottom: 6px;
+
+    border-radius: 8px;
+
+    color: #d1d5db;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.nav-item:hover {
+    background: var(--sidebar-hover);
+    color: white;
+}
+
+.nav-item.active {
+    background: var(--primary);
+    color: white;
+}
+
+.nav-icon {
+    width: 25px;
+
+    font-size: 18px;
+
+    margin-right: 10px;
+
+    text-align: center;
+}
+
+
+/* Oldalsáv alja */
+
+.sidebar-bottom {
+    margin-top: auto;
+
+    padding: 14px;
+}
+
+.logout-button {
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    text-align: left;
+}
+
+
+/* =========================
+   FŐ TARTALOM
+========================= */
+
+.main-content {
+    margin-left: var(--sidebar-width);
+
+    width: calc(100% - var(--sidebar-width));
+
+    min-height: 100vh;
+}
+
+
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar {
+    height: 85px;
+
+    background: var(--white);
+
+    border-bottom: 1px solid var(--border);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 35px;
+}
+
+.topbar h1 {
+    font-size: 24px;
+
+    margin-bottom: 5px;
+}
+
+.topbar p {
+    font-size: 13px;
+
+    color: var(--text-light);
+}
+
+
+/* Felhasználó */
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 50%;
+
+    background: #dbeafe;
+
+    color: var(--primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    margin-right: 10px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-details strong {
+    font-size: 14px;
+}
+
+.user-details span {
+    font-size: 12px;
+
+    color: var(--text-light);
+
+    margin-top: 3px;
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+.dashboard {
+    padding: 30px 35px;
+}
+
+
+/* Üdvözlő kártya */
+
+.welcome-card {
+    background: var(--primary);
+
+    color: white;
+
+    border-radius: 14px;
+
+    padding: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 25px;
+
+    overflow: hidden;
+}
+
+.welcome-label {
+    font-size: 11px;
+
+    font-weight: bold;
+
+    opacity: 0.75;
+
+    letter-spacing: 1px;
+}
+
+.welcome-card h2 {
+    font-size: 28px;
+
+    margin: 8px 0;
+}
+
+.welcome-card p {
+    max-width: 600px;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    opacity: 0.9;
+
+    margin-bottom: 20px;
+}
+
+.welcome-icon {
+    font-size: 100px;
+
+    opacity: 0.15;
+
+    margin-right: 40px;
+}
+
+
+/* Button */
+
+.primary-button {
+    display: inline-block;
+
+    background: white;
+
+    color: var(--primary);
+
+    text-decoration: none;
+
+    padding: 11px 18px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    transition: 0.2s;
+}
+
+.primary-button:hover {
+    background: #eff6ff;
+}
+
+
+/* =========================
+   STATISZTIKÁK
+========================= */
+
+.stats-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    padding: 20px;
+
+    display: flex;
+    align-items: center;
+}
+
+.stat-icon {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 19px;
+
+    margin-right: 14px;
+}
+
+.stat-icon.blue {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.stat-icon.orange {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.stat-icon.green {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.stat-icon.red {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.stat-title {
+    display: block;
+
+    color: var(--text-light);
+
+    font-size: 12px;
+
+    margin-bottom: 5px;
+}
+
+.stat-card strong {
+    font-size: 24px;
+}
+
+
+/* =========================
+   ALSÓ DASHBOARD
+========================= */
+
+.dashboard-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.content-card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    padding: 22px;
+}
+
+.card-header {
+    margin-bottom: 20px;
+}
+
+.card-header h3 {
+    font-size: 16px;
+
+    margin-bottom: 5px;
+}
+
+.card-header p {
+    font-size: 12px;
+
+    color: var(--text-light);
+}
+
+
+/* =========================
+   GYORS MŰVELETEK
+========================= */
+
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.quick-action {
+    display: flex;
+    align-items: center;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    color: var(--text);
+
+    transition: 0.2s;
+}
+
+.quick-action:hover {
+    background: #f3f4f6;
+}
+
+.quick-action-icon {
+    width: 38px;
+    height: 38px;
+
+    background: #eff6ff;
+
+    color: var(--primary);
+
+    border-radius: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+
+    margin-right: 12px;
+}
+
+.quick-action strong {
+    display: block;
+
+    font-size: 13px;
+
+    margin-bottom: 3px;
+}
+
+.quick-action span {
+    display: block;
+
+    font-size: 11px;
+
+    color: var(--text-light);
+}
+
+
+/* =========================
+   STÁTUSZOK
+========================= */
+
+.status-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 13px;
+}
+
+.status-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    font-size: 13px;
+}
+
+.status-row > span {
+    display: flex;
+    align-items: center;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    margin-right: 9px;
+}
+
+.status-dot.new {
+    background: #3b82f6;
+}
+
+.status-dot.draft {
+    background: #8b5cf6;
+}
+
+.status-dot.scheduled {
+    background: #f59e0b;
+}
+
+.status-dot.progress {
+    background: #06b6d4;
+}
+
+.status-dot.completed {
+    background: #22c55e;
+}
+
+.status-dot.wait {
+    background: #eab308;
+}
+
+.status-dot.failed {
+    background: #ef4444;
+}
+
+
+/* =========================
+   RESZPONZÍV
+========================= */
+
+@media (max-width: 1000px) {
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        width: 70px;
+    }
+
+    .logo-text,
+    .nav-item span:not(.nav-icon) {
+        display: none;
+    }
+
+    .logo {
+        justify-content: center;
+
+        padding: 0;
+    }
+
+    .logo-icon {
+        margin: 0;
+    }
+
+    .navigation {
+        padding: 20px 8px;
+    }
+
+    .nav-item {
+        justify-content: center;
+
+        padding: 12px 5px;
+    }
+
+    .nav-icon {
+        margin: 0;
+    }
+
+    .main-content {
+        margin-left: 70px;
+
+        width: calc(100% - 70px);
+    }
+
+    .topbar {
+        padding: 0 20px;
+    }
+
+    .dashboard {
+        padding: 20px;
+    }
+
+    .welcome-icon {
+        display: none;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================
+   BELÉPTETÉS ELŐTTI ÁLLAPOT
+=========================
+
+   Az app.js csak akkor veszi le ezt az osztályt, amikor a me.php
+   megerősítette, hogy szakember van bejelentkezve. Így egy pillanatra
+   sem villan fel a felület annak, aki nincs beléptetve.             */
+
+body.auth-pending .app {
+    visibility: hidden;
+}
+
+
+/* =========================
+   MEGERŐSÍTŐ ABLAK
+   =========================
+   A natív confirm() helyett, mert azt a beágyazott böngészők
+   azonnal elutasítják (lásd js/app.js kijelentkezés).            */
+
+.modal-hatter {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.modal-doboz {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.2);
+}
+
+.modal-cim {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.modal-szoveg {
+    font-size: 14px;
+    color: var(--text-light);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.modal-gombsor {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-gomb {
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.modal-gomb-megse {
+    background: var(--white);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.modal-gomb-megse:hover {
+    background: var(--background);
+}
+
+.modal-gomb-fo {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.modal-gomb-fo:hover {
+    background: var(--primary-dark);
+}

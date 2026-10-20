@@ -1,0 +1,10 @@
+# Projektdokumentumok és jegyzetek – nem kerülnek a publikus repóba
+*.pptx
+*.pdf
+*.zip
+*.pod
+*.png
+Közös/*.txt
+
+# Helyi eszközbeállítások
+.claude/

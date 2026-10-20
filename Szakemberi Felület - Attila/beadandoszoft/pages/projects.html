@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Projektek - SolarSystem</title>
+
+    <!-- Közös CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- Projektek oldal CSS -->
+    <link rel="stylesheet" href="../css/projects.css">
+</head>
+
+<body class="auth-pending">
+
+<div class="app">
+
+    <!-- =====================================
+         OLDALSÁV
+    ====================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                ☀
+            </div>
+
+            <div class="logo-text">
+
+                <strong>SolarSystem</strong>
+
+                <span>
+                    Telepítéskezelő
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="../index.html" class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Kezdőlap
+                </span>
+
+            </a>
+
+
+            <a href="projects.html" class="nav-item active">
+
+                <span class="nav-icon">
+                    ▣
+                </span>
+
+                <span>
+                    Projektek
+                </span>
+
+            </a>
+
+
+            <a href="parts.html" class="nav-item">
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                <span>
+                    Alkatrészek
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">
+                    ⚙
+                </span>
+
+                <span>
+                    Beállítások
+                </span>
+
+            </a>
+
+
+            <button
+                id="logoutButton"
+                class="nav-item logout-button">
+
+                <span class="nav-icon">
+                    ↪
+                </span>
+
+                <span>
+                    Kijelentkezés
+                </span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================
+         FŐ TARTALOM
+    ====================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Projektek
+                </h1>
+
+                <p>
+                    Napelemprojektek kezelése
+                </p>
+
+            </div>
+
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    SZ
+                </div>
+
+                <div class="user-details">
+
+                    <strong id="username">
+                        Szakember
+                    </strong>
+
+                    <span id="userRole">
+                        Szakember
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================
+             PROJEKTEK
+        ====================================== -->
+
+        <section class="projects-page">
+
+
+            <!-- OLDAL FEJLÉCE -->
+
+            <div class="projects-header">
+
+                <div>
+
+                    <h2>
+                        Projektek
+                    </h2>
+
+                    <p>
+                        A rendszerben található projektek
+                    </p>
+
+                </div>
+
+
+                <a
+                    href="new-project.html"
+                    class="primary-button">
+
+                    + Új projekt
+
+                </a>
+
+            </div>
+
+
+            <!-- =================================
+                 SZŰRÉS
+            ================================== -->
+
+            <div class="filter-card">
+
+                <div class="search-container">
+
+                    <label for="searchInput">
+                        Keresés
+                    </label>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Ügyfél vagy helyszín keresése...">
+
+                </div>
+
+
+                <div class="status-container">
+
+                    <label for="statusFilter">
+                        Státusz
+                    </label>
+
+                    <select id="statusFilter">
+
+                        <option value="all">
+                            Összes
+                        </option>
+
+                        <option value="New">
+                            Új
+                        </option>
+
+                        <option value="Draft">
+                            Tervezet
+                        </option>
+
+                        <option value="Wait">
+                            Várakozik
+                        </option>
+
+                        <option value="Scheduled">
+                            Ütemezett
+                        </option>
+
+                        <option value="InProgress">
+                            Folyamatban
+                        </option>
+
+                        <option value="Completed">
+                            Befejezett
+                        </option>
+
+                        <option value="Failed">
+                            Sikertelen
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================
+                 PROJEKT TÁBLÁZAT
+            ================================== -->
+
+            <div class="projects-card">
+
+                <div class="table-header">
+
+                    <div>
+
+                        <h3>
+                            Projektlista
+                        </h3>
+
+                        <span id="projectCount">
+                            0 projekt
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                        <tr>
+
+                            <th>
+                                ID
+                            </th>
+
+                            <th>
+                                Ügyfél
+                            </th>
+
+                            <th>
+                                Helyszín
+                            </th>
+
+                            <th>
+                                Státusz
+                            </th>
+
+                            <th>
+                                Létrehozva
+                            </th>
+
+                            <th>
+                                Művelet
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody id="projectsTableBody">
+
+                        <!--
+
+                            A JavaScript ide fogja
+                            behelyezni a projekteket.
+
+                        -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- Közös JavaScript -->
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/app.js"></script>
+
+<!-- Projektek JavaScript -->
+<script src="../js/projects.js"></script>
+
+</body>
+
+</html>

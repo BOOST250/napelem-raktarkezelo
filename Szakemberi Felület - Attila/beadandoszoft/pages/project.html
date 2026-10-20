@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Projekt részletei - SolarSystem</title>
+
+    <!-- Közös CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- Táblázat- és űrlapstílusok (meglévő osztályok újrahasznosítása) -->
+    <link rel="stylesheet" href="../css/projects.css">
+    <link rel="stylesheet" href="../css/new-project.css">
+</head>
+
+<body class="auth-pending">
+
+<div class="app">
+
+    <!-- =====================================
+         OLDALSÁV
+    ====================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                ☀
+            </div>
+
+            <div class="logo-text">
+
+                <strong>SolarSystem</strong>
+
+                <span>
+                    Telepítéskezelő
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="../index.html" class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Kezdőlap
+                </span>
+
+            </a>
+
+
+            <a href="projects.html" class="nav-item active">
+
+                <span class="nav-icon">
+                    ▣
+                </span>
+
+                <span>
+                    Projektek
+                </span>
+
+            </a>
+
+
+            <a href="parts.html" class="nav-item">
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                <span>
+                    Alkatrészek
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">
+                    ⚙
+                </span>
+
+                <span>
+                    Beállítások
+                </span>
+
+            </a>
+
+
+            <button
+                id="logoutButton"
+                class="nav-item logout-button">
+
+                <span class="nav-icon">
+                    ↪
+                </span>
+
+                <span>
+                    Kijelentkezés
+                </span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================
+         FŐ TARTALOM
+    ====================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Projekt részletei
+                </h1>
+
+                <p>
+                    Alkatrészigény rögzítése és állapotkezelés
+                </p>
+
+            </div>
+
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    SZ
+                </div>
+
+                <div class="user-details">
+
+                    <strong id="username">
+                        Szakember
+                    </strong>
+
+                    <span id="userRole">
+                        Szakember
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================
+             PROJEKT RÉSZLETEI
+        ====================================== -->
+
+        <section class="projects-page">
+
+            <a href="projects.html" class="back-link">
+                ← Vissza a projektekhez
+            </a>
+
+
+            <!-- Betöltés és hibajelzés -->
+
+            <div id="pageMessage" class="form-message"></div>
+
+
+            <div id="pageContent" style="display: none;">
+
+
+                <!-- OLDAL FEJLÉCE -->
+
+                <div class="projects-header">
+
+                    <div>
+
+                        <h2 id="projectTitle">
+                            —
+                        </h2>
+
+                        <p id="projectSubtitle">
+                            —
+                        </p>
+
+                    </div>
+
+
+                    <span
+                        id="projectStatus"
+                        class="project-status">
+                        —
+                    </span>
+
+                </div>
+
+
+                <!-- =============================
+                     PROJEKT ADATAI
+                ============================== -->
+
+                <div class="projects-card">
+
+                    <div class="table-header">
+
+                        <h3>
+                            Projekt adatai
+                        </h3>
+
+                    </div>
+
+
+                    <div class="status-list">
+
+                        <div class="status-row">
+                            <span>Ügyfél</span>
+                            <strong id="detailCustomer">—</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>E-mail</span>
+                            <strong id="detailEmail">—</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>Telefonszám</span>
+                            <strong id="detailPhone">—</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>Helyszín</span>
+                            <strong id="detailLocation">—</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>Létrehozva</span>
+                            <strong id="detailCreated">—</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>Leírás</span>
+                            <strong id="detailDescription">—</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     ALKATRÉSZIGÉNY
+
+                     Ez a kapcsolódási pont a
+                     raktárvezetői felülethez: az
+                     itt felvett sorok kerülnek a
+                     project_parts táblába, és ott
+                     a "Hiányzó alkatrészek"
+                     listában jelennek meg.
+                ============================== -->
+
+                <div class="projects-card">
+
+                    <div class="table-header">
+
+                        <h3>
+                            Alkatrészigény
+                        </h3>
+
+                        <p id="partsSummary">
+                            —
+                        </p>
+
+                    </div>
+
+
+                    <!-- Új igény felvétele -->
+
+                    <div class="form-section" id="addPartSection">
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+
+                                <label for="partSelect">
+                                    Alkatrész
+                                </label>
+
+                                <select id="partSelect">
+                                    <option value="">
+                                        Betöltés...
+                                    </option>
+                                </select>
+
+                                <span class="input-hint">
+                                    A szabad darabszám azt mutatja, mennyi van
+                                    raktáron más projektre lefoglalás nélkül.
+                                </span>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="partQuantity">
+                                    Mennyiség (db)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="partQuantity"
+                                    min="1"
+                                    step="1"
+                                    value="1">
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="button"
+                                id="addPartButton"
+                                class="primary-button">
+
+                                + Alkatrész hozzáadása
+
+                            </button>
+
+                        </div>
+
+
+                        <div id="partsMessage" class="form-message"></div>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Alkatrész</th>
+                                    <th>Egységár</th>
+                                    <th>Mennyiség</th>
+                                    <th>Érték</th>
+                                    <th>Raktár</th>
+                                    <th>Művelet</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="partsTableBody">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     ÁLLAPOTKEZELÉS
+                ============================== -->
+
+                <div class="projects-card">
+
+                    <div class="table-header">
+
+                        <h3>
+                            Állapot
+                        </h3>
+
+                        <p id="statusHint">
+                            —
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-section">
+
+                        <!-- A lehetséges lépéseket a project.js teszi be,
+                             mert az a projekt mostani állapotától függ -->
+
+                        <div class="form-actions" id="statusActions">
+                        </div>
+
+
+                        <!-- Munkaóra és munkadíj: a szakember a munka
+                             végén rögzíti (work_hours, labor_cost) -->
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+
+                                <label for="workHours">
+                                    Munkaóra
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="workHours"
+                                    min="0"
+                                    step="0.5"
+                                    placeholder="pl. 16">
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="laborCost">
+                                    Munkadíj (Ft)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="laborCost"
+                                    min="0"
+                                    step="1000"
+                                    placeholder="pl. 240000">
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-actions">
+
+                            <button
+                                type="button"
+                                id="saveWorkButton"
+                                class="secondary-button">
+
+                                Munkaadatok mentése
+
+                            </button>
+
+                        </div>
+
+
+                        <div id="statusMessage" class="form-message"></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     ÁLLAPOTELŐZMÉNYEK
+                ============================== -->
+
+                <div class="projects-card">
+
+                    <div class="table-header">
+
+                        <h3>
+                            Állapotelőzmények
+                        </h3>
+
+                        <p>
+                            A project_history tábla bejegyzései
+                        </p>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Állapot</th>
+                                    <th>Időpont</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="historyTableBody">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- JavaScript -->
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/project.js"></script>
+
+</body>
+
+</html>

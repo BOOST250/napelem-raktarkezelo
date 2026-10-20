@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bejelentkezés – SolarSystem</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!--
+    KÖZÖS BEJELENTKEZÉS
+
+    Mindhárom felület egyetlen belépő oldalt használ. Itt a users tábla
+    BÁRMELYIK fiókjával be lehet lépni; a szerepkör (users.role) dönti el,
+    hogy melyik felületre jut a felhasználó:
+
+        specialist         → szakemberi felület      (Attila)
+        warehouse_manager  → raktárvezetői felület   (Ábel)
+        warehouse_worker   → raktárosi felület       (Ivett)
+
+    A jelszó ellenőrzése a szerveren történik (api/login.php, password_verify),
+    az irányítás pedig a válaszban kapott szerepkör alapján. A felületek maguk
+    is újra ellenőrzik a szerepkört (api/me.php), tehát az URL kézi beírásával
+    nem lehet idegen felületre bejutni.
+  -->
+  <main class="belepo-lap">
+    <div class="belepo-kartya">
+
+      <div class="logo">
+        <div class="logo-ikon" aria-hidden="true">☀</div>
+        <div class="logo-szoveg">
+          <strong>SolarSystem</strong>
+          <span>Napelemrendszer-telepítés</span>
+        </div>
+      </div>
+
+      <form id="belepo-urlap" novalidate>
+        <h1>Bejelentkezés</h1>
+        <p class="belepo-alcim">Lépj be a felhasználóneveddel – a szerepköröd
+          alapján a megfelelő felületre kerülsz.</p>
+
+        <div id="belepo-info" class="belepo-info" role="status" hidden></div>
+        <div id="belepo-hiba" class="belepo-hiba" role="alert" hidden></div>
+
+        <label class="mezo">
+          <span>Felhasználónév</span>
+          <input class="beviteli" id="felhasznalonev" name="username"
+                 autocomplete="username" required autofocus>
+        </label>
+
+        <label class="mezo">
+          <span>Jelszó</span>
+          <input class="beviteli" id="jelszo" name="password" type="password"
+                 autocomplete="current-password" required>
+        </label>
+
+        <button type="submit" class="gomb fo" id="belepo-gomb">Bejelentkezés</button>
+      </form>
+
+      <!-- Csak tájékoztatás: melyik fiók melyik felületre visz. Jelszó
+           szándékosan nem szerepel itt, az az adatbázisban (users tábla) van. -->
+      <details class="fiok-sugo">
+        <summary>Milyen fiókok vannak?</summary>
+        <ul>
+          <li><code>szakember1</code> – szakemberi felület</li>
+          <li><code>raktarvezeto1</code> – raktárvezetői felület</li>
+          <li><code>raktaros1</code> – raktárosi felület</li>
+        </ul>
+        <p>A fiókok a <code>users</code> táblában vannak. Új felhasználót az
+          adminisztrátor vesz fel, regisztráció nincs.</p>
+      </details>
+
+    </div>
+  </main>
+
+  <script src="js/belepes.js"></script>
+</body>
+</html>
