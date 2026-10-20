@@ -41,6 +41,16 @@ jobs:
           cp -r "Raktárosi Felület -Ivett" "$P/raktaros"
           rm -f "$P/raktarvezeto/README.md"
 
+          # A böngésző minden betöltéskor ellenőrizze, változott-e a fájl,
+          # különben egy-egy telepítés után még napokig a régi CSS/JS futna.
+          cat > "$P/.htaccess" <<'HTACCESS'
+          <IfModule mod_headers.c>
+            <FilesMatch "\.(html|css|js)$">
+              Header set Cache-Control "no-cache"
+            </FilesMatch>
+          </IfModule>
+          HTACCESS
+
           # var_export: a jelszóban lévő idézőjel vagy $ jel sem rontja el a PHP-t
           cat > /tmp/gen.php <<'PHP'
           <?php
