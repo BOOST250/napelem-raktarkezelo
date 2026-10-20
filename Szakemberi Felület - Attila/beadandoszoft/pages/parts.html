@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Alkatrészek - SolarSystem</title>
+
+    <!-- Közös CSS -->
+    <link rel="stylesheet" href="../css/style.css">
+
+    <!-- A táblázat és szűrő stílusa közös a projektek oldallal -->
+    <link rel="stylesheet" href="../css/projects.css">
+</head>
+
+<body class="auth-pending">
+
+<div class="app">
+
+    <!-- =====================================
+         OLDALSÁV
+    ====================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                ☀
+            </div>
+
+            <div class="logo-text">
+
+                <strong>SolarSystem</strong>
+
+                <span>
+                    Telepítéskezelő
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="../index.html" class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Kezdőlap
+                </span>
+
+            </a>
+
+
+            <a href="projects.html" class="nav-item">
+
+                <span class="nav-icon">
+                    ▣
+                </span>
+
+                <span>
+                    Projektek
+                </span>
+
+            </a>
+
+
+            <a href="parts.html" class="nav-item active">
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                <span>
+                    Alkatrészek
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="#" class="nav-item">
+
+                <span class="nav-icon">
+                    ⚙
+                </span>
+
+                <span>
+                    Beállítások
+                </span>
+
+            </a>
+
+
+            <button
+                id="logoutButton"
+                class="nav-item logout-button">
+
+                <span class="nav-icon">
+                    ↪
+                </span>
+
+                <span>
+                    Kijelentkezés
+                </span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================
+         FŐ TARTALOM
+    ====================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Alkatrészek
+                </h1>
+
+                <p>
+                    Raktárkészlet és árak
+                </p>
+
+            </div>
+
+
+            <div class="user-info">
+
+                <div class="user-avatar">
+                    SZ
+                </div>
+
+                <div class="user-details">
+
+                    <strong id="username">
+                        Szakember
+                    </strong>
+
+                    <span id="userRole">
+                        Szakember
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================
+             PROJEKTEK
+        ====================================== -->
+
+        <section class="projects-page">
+
+
+            <!-- OLDAL FEJLÉCE -->
+
+            <div class="projects-header">
+
+                <div>
+
+                    <h2>
+                        Alkatrészek
+                    </h2>
+
+                    <p>
+                        A raktárban kezelt alkatrészek, árak és szabad készlet
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================
+                 SZŰRÉS
+            ================================== -->
+
+            <div class="filter-card">
+
+                <div class="search-container">
+
+                    <label for="searchInput">
+                        Keresés
+                    </label>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Alkatrész nevének keresése...">
+
+                </div>
+
+
+                <div class="status-container">
+
+                    <label for="stockFilter">
+                        Készlet
+                    </label>
+
+                    <select id="stockFilter">
+
+                        <option value="all">
+                            Összes
+                        </option>
+
+                        <option value="available">
+                            Van szabad készlet
+                        </option>
+
+                        <option value="none">
+                            Nincs szabad készlet
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================
+                 ALKATRÉSZ TÁBLÁZAT
+            ================================== -->
+
+            <div class="projects-card">
+
+                <div class="table-header">
+
+                    <div>
+
+                        <h3>
+                            Alkatrészlista
+                        </h3>
+
+                        <span id="partCount">
+                            0 alkatrész
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                        <tr>
+
+                            <th>
+                                Alkatrész
+                            </th>
+
+                            <th>
+                                Egységár
+                            </th>
+
+                            <th>
+                                Raktáron
+                            </th>
+
+                            <th>
+                                Lefoglalva
+                            </th>
+
+                            <th>
+                                Szabad
+                            </th>
+
+                            <th>
+                                Igényelt, még nincs foglalva
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody id="partsTableBody">
+
+                        <!--
+
+                            A JavaScript ide fogja
+                            behelyezni az alkatrészeket.
+
+                        -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- Közös JavaScript -->
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/app.js"></script>
+
+<!-- Alkatrészek JavaScript -->
+<script src="../js/parts.js"></script>
+
+</body>
+
+</html>
