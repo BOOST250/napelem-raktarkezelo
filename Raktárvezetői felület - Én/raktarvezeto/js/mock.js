@@ -4,7 +4,9 @@
    szabályokkal. Az adatok a böngésző localStorage-ában maradnak meg. */
 
 const MockBackend = (() => {
-  const KULCS = 'raktarvezeto_demo_v1';
+  // v2: a rekeszeknek saját max_kapacitas mezőjük van (B.6), és a hiányzó /
+  // előfoglalt listát a felület a /nyers pillanatképből számolja.
+  const KULCS = 'raktarvezeto_demo_v2';
   // A bejelentkezés külön kulcson van, így a demo adatok visszaállítása nem jelentkeztet ki.
   const SESSION_KULCS = 'raktarvezeto_demo_session';
   // Demo felhasználók (a valódi rendszerben a users táblában vannak, az admin veszi fel őket).
@@ -36,7 +38,9 @@ const MockBackend = (() => {
       for (let oszlop = 1; oszlop <= 3; oszlop++)
         for (let polc = 1; polc <= 2; polc++)
           for (let rekesz = 1; rekesz <= 2; rekesz++)
-            rekeszek.push({ id: id++, sor, oszlop, polc, rekesz, alkatresz_id: null, darab: 0 });
+            // 100 db: minden demó-alkatrész max_darab értéke belefér, így a
+            // kapacitás csak akkor szorít, ha a felhasználó lejjebb viszi.
+            rekeszek.push({ id: id++, sor, oszlop, polc, rekesz, azonosito: '', alkatresz_id: null, darab: 0, max_kapacitas: 100 });
 
     // [rekesz_id, alkatresz_id, darab]
     [[1, 1, 10], [2, 1, 10], [3, 1, 6], [5, 2, 2], [6, 2, 1], [7, 3, 1],
@@ -79,7 +83,8 @@ const MockBackend = (() => {
   const hiba = (status, uzenet) => new ApiError(uzenet, status);
   const masol = x => (x === undefined ? x : JSON.parse(JSON.stringify(x)));
   const kovetkezoId = lista => lista.reduce((m, x) => Math.max(m, x.id), 0) + 1;
-  const helyKod = r => `S${r.sor}·O${r.oszlop}·P${r.polc}·R${r.rekesz}`;
+  const helyKod = r => r.azonosito || `S${r.sor}·O${r.oszlop}·P${r.polc}·R${r.rekesz}`;
+  const rekeszHatar = (r, alkatreszMax) => Math.min(alkatreszMax, Number.isFinite(Number(r.max_kapacitas)) ? Number(r.max_kapacitas) : Infinity);
   const egesz = (v, min) => Number.isInteger(v) && v >= min;
 
   const alkatresz = id => db.alkatreszek.find(a => a.id === id);
@@ -126,13 +131,31 @@ const MockBackend = (() => {
   function ujRekesz(body) {
     const r = { sor: Number(body?.sor), oszlop: Number(body?.oszlop), polc: Number(body?.polc), rekesz: Number(body?.rekesz) };
     if (![r.sor, r.oszlop, r.polc, r.rekesz].every(v => egesz(v, 1))) throw hiba(400, 'A sor, oszlop, polc és rekesz legalább 1 legyen.');
+    const max = Number(body?.max_kapacitas);
+    if (!egesz(max, 1)) throw hiba(400, 'A kapacitás legalább 1 legyen.');
+    const azonosito = String(body?.azonosito ?? '').trim();
+    if (azonosito.length > 20) throw hiba(400, 'A rekeszazonosító legfeljebb 20 karakter.');
     if (db.rekeszek.some(x => x.sor === r.sor && x.oszlop === r.oszlop && x.polc === r.polc && x.rekesz === r.rekesz)) {
       throw hiba(409, `A(z) ${helyKod(r)} hely már létezik.`);
     }
-    const uj = { id: kovetkezoId(db.rekeszek), ...r, alkatresz_id: null, darab: 0 };
+    if (azonosito && db.rekeszek.some(x => String(x.azonosito || '').toLowerCase() === azonosito.toLowerCase())) {
+      throw hiba(409, 'Ez a rekeszazonosító már létezik.');
+    }
+    const uj = { id: kovetkezoId(db.rekeszek), ...r, azonosito, alkatresz_id: null, darab: 0, max_kapacitas: max };
     db.rekeszek.push(uj);
     ment();
     return uj;
+  }
+
+  function modositRekesz(id, body) {
+    const r = db.rekeszek.find(x => x.id === id);
+    if (!r) throw hiba(404, 'Nincs ilyen rekesz.');
+    const max = Number(body?.max_kapacitas);
+    if (!egesz(max, 1)) throw hiba(400, 'A kapacitás legalább 1 legyen.');
+    if (max < r.darab) throw hiba(409, `A rekeszben ${r.darab} db van, a kapacitás ennél nem lehet kisebb.`);
+    r.max_kapacitas = max;
+    ment();
+    return r;
   }
 
   function bevetelezes(body) {
@@ -151,12 +174,13 @@ const MockBackend = (() => {
       if (latott.has(r.id)) throw hiba(400, `A(z) ${helyKod(r)} rekesz többször szerepel.`);
       latott.add(r.id);
       if (!egesz(darab, 1)) throw hiba(400, 'A darabszám legalább 1 egész szám legyen.');
-      if (r.alkatresz_id !== null && r.alkatresz_id !== a.id && r.darab > 0) {
+      if (r.alkatresz_id !== null && r.alkatresz_id !== a.id) {
         throw hiba(409, `A(z) ${helyKod(r)} rekeszben más alkatrész van.`);
       }
       const jelenleg = r.alkatresz_id === a.id ? r.darab : 0;
-      if (jelenleg + darab > a.max_darab) {
-        throw hiba(409, `A(z) ${helyKod(r)} rekeszbe legfeljebb ${a.max_darab - jelenleg} db fér még.`);
+      const hatar = rekeszHatar(r, a.max_darab);
+      if (jelenleg + darab > hatar) {
+        throw hiba(409, `A(z) ${helyKod(r)} rekeszbe legfeljebb ${hatar - jelenleg} db fér még.`);
       }
       lepesek.push({ r, uj: jelenleg + darab });
     }
@@ -204,6 +228,24 @@ const MockBackend = (() => {
       sor.projektek.push({ id: p.id, nev: p.nev, statusz: p.statusz, darab: hiany });
     }
     return [...csoport.values()];
+  }
+
+  // Az api.js B.3/B.4 számításának nyersanyaga (készlet + aktív igények).
+  function nyers() {
+    const igenyek = aktivTetelek().map(pa => {
+      const p = projekt(pa.projekt_id);
+      const a = alkatresz(pa.alkatresz_id);
+      return {
+        projekt_id: p.id,
+        projekt_nev: p.nev,
+        statusz: p.statusz,
+        alkatresz_id: a.id,
+        nev: a.nev,
+        igenyelt: pa.darab,
+        lefoglalt: pa.lefoglalt,
+      };
+    });
+    return { alkatreszek: alkatreszLista(), igenyek };
   }
 
   function lefoglaltLista() {
@@ -264,8 +306,10 @@ const MockBackend = (() => {
       case 'GET alkatreszek': return alkatreszLista();
       case 'POST alkatreszek': return ujAlkatresz(body);
       case 'PUT alkatreszek/:id': return modositAlkatresz(Number(id), body);
+      case 'GET nyers': return nyers();
       case 'GET rekeszek': return db.rekeszek;
       case 'POST rekeszek': return ujRekesz(body);
+      case 'PUT rekeszek/:id': return modositRekesz(Number(id), body);
       case 'POST bevetelezes': return bevetelezes(body);
       case 'GET hianyzo': return hianyzoLista();
       case 'GET lefoglalt': return lefoglaltLista();

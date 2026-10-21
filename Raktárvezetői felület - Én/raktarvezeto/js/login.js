@@ -23,6 +23,9 @@
     infoDoboz.textContent = 'Sikeresen kijelentkeztél.';
     infoDoboz.hidden = false;
     history.replaceState(null, '', location.pathname + location.search);
+  } else if (location.hash === '#nincs-jog') {
+    hiba('Ehhez a felülethez raktárvezetői jogosultság kell.');
+    history.replaceState(null, '', location.pathname + location.search);
   }
 
   // Demo módban a tesztfelhasználókra kattintva kitöltődik az űrlap
