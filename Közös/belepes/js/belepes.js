@@ -16,8 +16,7 @@
   const AUTH_BASE = '../api';
 
   /* Szerepkör → felület. A `kesz` azt jelzi, hogy a felület használható-e
-     már; a raktárosi felület (Ivett) még fejlesztés alatt áll, ezért oda
-     nem irányítunk át automatikusan, csak felajánljuk. */
+     már. Az adminisztrátornak nincs saját felülete, oda nem irányítunk. */
   const FELULETEK = {
     specialist: {
       nev: 'Szakember',
@@ -32,7 +31,7 @@
     warehouse_worker: {
       nev: 'Raktáros',
       ut: '../raktaros/index.html',
-      kesz: false,
+      kesz: true,
     },
     admin: {
       nev: 'Adminisztrátor',
