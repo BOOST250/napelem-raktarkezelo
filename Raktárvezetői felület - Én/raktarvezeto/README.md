@@ -18,15 +18,17 @@ Az előfoglalás nem ugyanaz, mint a készletből való lefoglalás. Előfoglal�
 
 ## Futtatás
 
-**Éles mód** az alapértelmezés (`js/config.js` → `USE_MOCK: false`). A felület a `napelem/raktarvezeto/` mappából hívja a `napelem/api/` végpontokat (`API_BASE: '../api'`).
+**Éles mód** az alapértelmezés (`js/config.js` → `USE_MOCK: false`). Az `API_BASE` és az `AUTH_BASE` is `/napelem/api`: gyökérhez képesti útvonal, host nélkül. A böngésző azt a gépet hívja, amelyikről az oldalt megnyitották, ezért a felület a helyi hálózatról is működik.
 
-1. XAMPP: Apache és MySQL.
+1. XAMPP: Apache és MySQL azon a gépen, ahol a fájlok vannak.
 2. Importáld a `napelemrendszer.sql` fájlt, utána a `napelemrendszer_illesztes.sql` fájlt. A második nélkül a szerepkörök magyar enum-értékek (`raktarvezeto`), a bevételezés viszont `warehouse_manager`-t vár.
 3. A mappa a `htdocs/napelem/raktarvezeto/` helyre kerüljön, az API pedig `htdocs/napelem/api/`.
-4. Nyisd meg `http://localhost/napelem/belepes/` címen, és `raktarvezeto1` / `Z12356` fiókkal lépj be (a dump jelszava; első belépéskor a backend hash-eli).
+4. Nyisd meg a szerver címével, például `http://192.168.1.23/napelem/belepes/` vagy `http://192.168.1.23/napelem/raktarvezeto/`. A `192.168.1.23` helyére a géped LAN-címe kerül. Belépés: `raktarvezeto1` / `Z12356` (a dump jelszava; első belépéskor a backend hash-eli).
 5. Csak `warehouse_manager` maradhat ezen a felületen. Más szerepkör a közös belépőre kerül vissza, kijelentkeztetés nélkül, hogy a saját felületére jusson.
 
-Más címről (például `python -m http.server`) az API így adható meg: `index.html?api=http://localhost/napelem/api`. A böngészőt ne `file://` alól nyisd meg: a session-süti úgy nem megy el. A lap és az API legyen ugyanaz a host (`localhost` a `localhosttal`, ne keverd a `127.0.0.1`-gyel), különben a SameSite süti nem jut el a kéréshez.
+A kód sehol nem ír be gépnevet vagy IP-címet. A `parts.php` hívás így a lap originjére megy: ha az oldal `http://192.168.1.23/napelem/raktarvezeto/`, az API `http://192.168.1.23/napelem/api/parts.php`. A session-süti emiatt ugyanahhoz a hozthoz tartozik, másik gépről is. `file://` alól ne nyisd meg. Ha az útvonal nem `/napelem/api`, csak másik gyökérútvonal adható meg (`?api=/napelem/api`); teljes cím hosttal nem.
+
+A közös belépőre a felület `../belepes/` relatív úttal megy, az is a lap hostján marad.
 
 **Demo mód** backend nélkül: `index.html?mock=1` (vissza élesre: `?mock=0`). Nyolc alkatrész, 24 rekesz, öt projekt, a módosítás a `localStorage`-ban marad (`raktarvezeto_demo_v2`). A bal alsó **„Demo adatok visszaállítása”** a kezdőadatot hozza vissza, kijelentkeztetés nélkül.
 

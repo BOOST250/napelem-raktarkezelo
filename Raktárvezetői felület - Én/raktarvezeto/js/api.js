@@ -6,7 +6,7 @@
    ezért az éles ág itt fordít és összesít. A demo ág ugyanezt a formát
    adja vissza a MockBackendből, hogy az app.js ne tudjon a különbségről.
 
-   Éles végpontok (API_BASE, alapból ../api a napelem mappában):
+   Éles végpontok (API_BASE, alapból /napelem/api, a lap originjéhez képest):
      parts.php, bins.php, projects.php, project_parts.php, receiving.php
      login.php, me.php, logout.php
 */
