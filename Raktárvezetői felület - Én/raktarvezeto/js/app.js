@@ -14,9 +14,19 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 const huRendez = (a, b) => a.localeCompare(b, 'hu');
-const helyRendez = (a, b) => a.sor - b.sor || a.oszlop - b.oszlop || a.polc - b.polc || a.rekesz - b.rekesz;
-const helyKod = r => `S${r.sor} · O${r.oszlop} · P${r.polc} · R${r.rekesz}`;
-const uresRekesz = r => r.alkatresz_id === null || r.darab === 0;
+const helyRendez = (a, b) =>
+  a.sor - b.sor || a.oszlop - b.oszlop || a.polc - b.polc
+  || (a.rekesz ?? 0) - (b.rekesz ?? 0)
+  || String(a.azonosito || '').localeCompare(String(b.azonosito || ''), 'hu', { numeric: true });
+const helyKod = r => r.azonosito || `S${r.sor} · O${r.oszlop} · P${r.polc} · R${r.rekesz ?? '?'}`;
+const helyReszlet = r => `${r.sor}. sor · ${r.oszlop}. oszlop · ${r.polc}. polc`;
+const helyCimke = r => (r.azonosito ? `${r.azonosito} · ${helyReszlet(r)}` : helyKod(r));
+// Üres = nincs hozzárendelt alkatrész. A quantity = 0, de idegen part_id-s
+// rekeszt a receiving.php foglaltnak veszi, ezért az nem „üres hely”.
+const uresRekesz = r => r.alkatresz_id === null;
+// parts.price decimal(10,2), bins.identifier varchar(20)
+const MAX_AR = 99999999;
+const MAX_AZONOSITO = 20;
 // Egy rekeszbe ennyi db férhet ebből az alkatrészből. Két korlát van, és a
 // szigorúbb érvényes: az alkatrész max. darab/rekesz értéke és a rekesz saját
 // kapacitása. (Demo módban nincs rekesz-kapacitás, ott max_kapacitas = Infinity.)
@@ -206,10 +216,10 @@ const NEZETEK = {
     cim: 'Kezdőlap',
     alcim: 'A raktár készletének és a projektek alkatrész-ellátottságának áttekintése',
     betolt: async () => {
-      const [alkatreszek, rekeszek, hianyzo, lefoglalt] = await Promise.all([
-        Api.alkatreszek(), Api.rekeszek(), Api.hianyzoAlkatreszek(), Api.lefoglaltAlkatreszek(),
+      const [alkatreszek, rekeszek, hianyzo, elofoglalt, lefoglalt] = await Promise.all([
+        Api.alkatreszek(), Api.rekeszek(), Api.hianyzoAlkatreszek(), Api.elofoglaltAlkatreszek(), Api.lefoglaltAlkatreszek(),
       ]);
-      return { alkatreszek, rekeszek, hianyzo, lefoglalt };
+      return { alkatreszek, rekeszek, hianyzo, elofoglalt, lefoglalt };
     },
     megjelenit: kezdolapNezet,
   },
@@ -242,16 +252,25 @@ const NEZETEK = {
   },
   hianyzo: {
     cim: 'Hiányzó alkatrészek',
-    alcim: 'Projektekhez igényelt, de készlet hiányában le nem foglalt alkatrészek',
+    alcim: 'Rendelési lista: az aktív igény ennyivel haladja meg a raktárkészletet',
     betolt: async () => {
       const [hianyzo, alkatreszek] = await Promise.all([Api.hianyzoAlkatreszek(), Api.alkatreszek()]);
       return { hianyzo, alkatreszek };
     },
     megjelenit: hianyzoNezet,
   },
+  elofoglalt: {
+    cim: 'Előfoglalt hiányok',
+    alcim: 'Hiányzó, de már előre lefoglalt alkatrészek – készletre váró előrendelések',
+    betolt: async () => {
+      const [elofoglalt, alkatreszek] = await Promise.all([Api.elofoglaltAlkatreszek(), Api.alkatreszek()]);
+      return { elofoglalt, alkatreszek };
+    },
+    megjelenit: elofoglaltNezet,
+  },
   lefoglalt: {
     cim: 'Lefoglalt alkatrészek',
-    alcim: 'Projektekhez lefoglalt készlet',
+    alcim: 'A raktárkészletből projektekhez már elkülönített alkatrészek',
     betolt: async () => {
       const [lefoglalt, alkatreszek] = await Promise.all([Api.lefoglaltAlkatreszek(), Api.alkatreszek()]);
       return { lefoglalt, alkatreszek };
@@ -262,9 +281,8 @@ const NEZETEK = {
 
 /* ---------- 0. Kezdőlap ---------- */
 
-function kezdolapNezet(el, { alkatreszek, rekeszek, hianyzo, lefoglalt }) {
+function kezdolapNezet(el, { alkatreszek, rekeszek, hianyzo, elofoglalt, lefoglalt }) {
   const alk = new Map(alkatreszek.map(a => [a.id, a]));
-  const szabadRekesz = rekeszek.filter(uresRekesz).length;
   const keszletErtek = osszeg(alkatreszek, a => a.keszlet * a.ar);
 
   // Projektek állapota a hiányzó és a lefoglalt tételek alapján (projektenként egyszer számolva)
@@ -289,10 +307,10 @@ function kezdolapNezet(el, { alkatreszek, rekeszek, hianyzo, lefoglalt }) {
     </div>
 
     <div class="stats-grid">
-      ${stat('Alkatrésztípusok', fmtSzam(alkatreszek.length), 'blue', '▤')}
-      ${stat('Szabad rekeszek', `${fmtSzam(szabadRekesz)} / ${fmtSzam(rekeszek.length)}`, 'green', '▦')}
-      ${stat('Hiányzó tételek', fmtSzam(hianyzo.length), 'red', '⚠')}
-      ${stat('Lefoglalt darab', fmtDb(osszeg(lefoglalt, f => f.darab)), 'orange', '⚑')}
+      ${stat('Rendelendő tétel', fmtSzam(hianyzo.length), 'red', '⚠')}
+      ${stat('Rendelendő darab', fmtDb(osszeg(hianyzo, h => h.hianyzo_darab)), 'orange', '▤')}
+      ${stat('Előfoglalt hiány', fmtDb(osszeg(elofoglalt, h => h.elofoglalt_darab)), 'blue', '⚑')}
+      ${stat('Készletből lefoglalva', fmtDb(osszeg(lefoglalt, f => f.darab)), 'green', '▦')}
     </div>
 
     <div class="dashboard-grid">
@@ -313,7 +331,11 @@ function kezdolapNezet(el, { alkatreszek, rekeszek, hianyzo, lefoglalt }) {
           </button>
           <a href="#hianyzo" class="quick-action">
             <div class="quick-action-icon">⚠</div>
-            <div><strong>Hiányzó alkatrészek</strong><span>Mit kell beszerezni a projektekhez?</span></div>
+            <div><strong>Hiányzó alkatrészek</strong><span>Mit kell beszerezni, a lefoglalások figyelembevételével?</span></div>
+          </a>
+          <a href="#elofoglalt" class="quick-action">
+            <div class="quick-action-icon">⏳</div>
+            <div><strong>Előfoglalt hiányok</strong><span>Ami hiányzik, de egy projekt már előre lefoglalta</span></div>
           </a>
         </div>
       </div>
@@ -332,11 +354,11 @@ function kezdolapNezet(el, { alkatreszek, rekeszek, hianyzo, lefoglalt }) {
     </div>
 
     <div class="card">
-      ${tablaFejlec('Sürgős hiányok', 'A legnagyobb mennyiségben hiányzó alkatrészek',
+      ${tablaFejlec('Sürgős rendelések', 'A legnagyobb mennyiségben beszerezendő alkatrészek',
         { jobb: '<a href="#hianyzo" class="row-action">Összes megtekintése</a>' })}
       <div class="table-wrap">
         <table class="table">
-          <thead><tr><th>Alkatrész</th><th class="num">Hiányzik</th><th class="num">Szabad készlet</th><th>Érintett projektek</th><th></th></tr></thead>
+          <thead><tr><th>Alkatrész</th><th class="num">Rendelendő</th><th class="num">Szabad készlet</th><th>Érintett projektek</th><th></th></tr></thead>
           <tbody id="surgos-sorok">${surgos.length ? surgos.map(h => {
             const a = alk.get(h.alkatresz_id);
             return `<tr>
@@ -474,6 +496,7 @@ function ujAlkatreszModal(alkatreszek) {
         throw new Error('Már létezik ilyen nevű alkatrész.');
       }
       const ar = egeszSzam(form, 'ar', 'Egységár', 0);
+      if (ar > MAX_AR) throw new Error(`Az egységár legfeljebb ${fmtFt(MAX_AR)} lehet.`);
       const max_darab = egeszSzam(form, 'max_darab', 'Max. darab / rekesz', 1);
       await Api.ujAlkatresz({ nev, ar, max_darab });
       toast(`„${nev}” felvéve.`);
@@ -503,6 +526,7 @@ function modositasModal(a, rekeszek) {
           : 'Jelenleg egyik rekeszben sincs ebből az alkatrészből.'}</p>`,
     kuldes: async form => {
       const ar = egeszSzam(form, 'ar', 'Egységár', 0);
+      if (ar > MAX_AR) throw new Error(`Az egységár legfeljebb ${fmtFt(MAX_AR)} lehet.`);
       const max_darab = egeszSzam(form, 'max_darab', 'Max. darab / rekesz', 1);
       if (max_darab < legtobb) {
         throw new Error(`A max. darab legalább ${legtobb} legyen, mert egy rekeszben már ennyi van ebből.`);
@@ -623,7 +647,7 @@ function bevetelezesNezet(el, { alkatreszek, rekeszek }) {
       const most = jelenleg(r, a);
       const opciok = alkalmas
         .filter(x => x.id === t.rekesz_id || !foglalt.has(x.id))
-        .map(x => `<option value="${x.id}"${x.id === t.rekesz_id ? ' selected' : ''}>${helyKod(x)} (${
+        .map(x => `<option value="${x.id}"${x.id === t.rekesz_id ? ' selected' : ''}>${helyCimke(x)} (${
           uresRekesz(x) ? 'üres' : `${x.darab}/${korlat(x, a)} db`})</option>`)
         .join('');
       return `<tr data-i="${i}">
@@ -711,7 +735,21 @@ function bevetelezesNezet(el, { alkatreszek, rekeszek }) {
     const a = valasztott();
     const gomb = $('#bev-rogzit');
     const hibaEl = $('#bev-hiba');
+    if (!a) return;
     const tetelek = terv.map(t => ({ rekesz_id: t.rekesz_id, darab: t.darab }));
+    for (const t of tetelek) {
+      const r = rekesz(t.rekesz_id);
+      if (!r || !ervenyesDarab(t.darab) || jelenleg(r, a) + t.darab > korlat(r, a)) {
+        hibaEl.textContent = 'A terv már nem fér el a rekeszekben. Frissítsd az elhelyezést.';
+        hibaEl.hidden = false;
+        return;
+      }
+      if (r.alkatresz_id !== null && r.alkatresz_id !== a.id) {
+        hibaEl.textContent = `A(z) ${helyCimke(r)} rekeszben más alkatrész van.`;
+        hibaEl.hidden = false;
+        return;
+      }
+    }
     const elhelyezve = osszeg(tetelek, t => t.darab);
 
     gomb.disabled = true;
@@ -812,7 +850,9 @@ function rekeszekNezet(el, { rekeszek, alkatreszek }) {
           </optgroup>
         </select>
       </div>
-      <span class="filter-note">Hely: S = sor, O = oszlop, P = polc, R = rekesz</span>
+      <span class="filter-note">${rekeszek.some(r => r.azonosito)
+        ? 'Az azonosító (pl. A1-1) a rekesz neve, alatta a sor, az oszlop és a polc. A „Kapacitás” a rekesz saját felső határa.'
+        : 'Hely: S = sor, O = oszlop, P = polc, R = rekesz. A „Kapacitás” a rekesz saját felső határa.'}</span>
     </div>
     <div class="card">
       ${tablaFejlec('Rekeszek', '', { alcimId: 'rekesz-db' })}
@@ -822,18 +862,26 @@ function rekeszekNezet(el, { rekeszek, alkatreszek }) {
   const szuro = $('#rekesz-szuro');
   const racs = $('#rekesz-racs');
 
+  const kapacitasGomb = r => `<div class="bin-actions"><button type="button" class="row-action" data-kapacitas="${r.id}">Kapacitás${
+    Number.isFinite(r.max_kapacitas) ? `: ${fmtSzam(r.max_kapacitas)} db` : ''
+  }</button></div>`;
+
   const kartya = r => {
+    const fej = r.azonosito
+      ? `<div class="bin-loc">${esc(r.azonosito)}</div><div class="bin-coords">${esc(helyReszlet(r))}</div>`
+      : `<div class="bin-loc">${esc(helyKod(r))}</div>`;
     if (uresRekesz(r)) {
-      return `<div class="bin empty"><div class="bin-loc">${helyKod(r)}</div><div class="bin-name muted">Üres</div></div>`;
+      return `<div class="bin empty">${fej}<div class="bin-name muted">Üres</div>${kapacitasGomb(r)}</div>`;
     }
     const a = alk.get(r.alkatresz_id);
-    const max = a ? korlat(r, a) : r.darab;
+    const max = a ? korlat(r, a) : Math.max(r.darab, Number.isFinite(r.max_kapacitas) ? r.max_kapacitas : r.darab);
     const nev = a ? a.nev : 'Ismeretlen alkatrész';
-    return `<div class="bin${r.darab >= max ? ' is-full' : ''}">
-      <div class="bin-loc">${helyKod(r)}</div>
+    return `<div class="bin${r.darab >= max && max > 0 ? ' is-full' : ''}">
+      ${fej}
       <div class="bin-name" title="${esc(nev)}">${esc(nev)}</div>
       ${csik(r.darab, max)}
       <div class="bin-qty">${fmtSzam(r.darab)} / ${fmtSzam(max)} db</div>
+      ${kapacitasGomb(r)}
     </div>`;
   };
 
@@ -857,38 +905,113 @@ function rekeszekNezet(el, { rekeszek, alkatreszek }) {
   };
 
   szuro.addEventListener('change', rajzol);
+  racs.addEventListener('click', e => {
+    const gomb = e.target.closest('[data-kapacitas]');
+    if (!gomb) return;
+    const r = rekeszek.find(x => x.id === Number(gomb.dataset.kapacitas));
+    if (r) kapacitasModal(r, alk.get(r.alkatresz_id));
+  });
   rajzol();
+}
+
+function azonositoJavaslat(sor, polc, oszlop) {
+  const betu = sor >= 1 && sor <= 26 ? String.fromCharCode(64 + sor) : `S${sor}`;
+  return `${betu}${polc}-${oszlop}`;
 }
 
 function ujRekeszModal(rekeszek) {
   const utolso = [...rekeszek].sort(helyRendez).pop();
-  // Kapacitás: az utoljára felvett rekeszé a minta; ha az korlátlan (demo mód), 20.
   const utolsoKap = utolso && Number.isFinite(utolso.max_kapacitas) ? utolso.max_kapacitas : 20;
-  const alap = utolso
-    ? { sor: utolso.sor, oszlop: utolso.oszlop, polc: utolso.polc, rekesz: utolso.rekesz + 1, max_kapacitas: utolsoKap }
-    : { sor: 1, oszlop: 1, polc: 1, rekesz: 1, max_kapacitas: 20 };
+  const alap = !utolso
+    ? { sor: 1, oszlop: 1, polc: 1, rekesz: 1, max_kapacitas: utolsoKap }
+    : CONFIG.USE_MOCK
+      ? { sor: utolso.sor, oszlop: utolso.oszlop, polc: utolso.polc, rekesz: (utolso.rekesz ?? 0) + 1, max_kapacitas: utolsoKap }
+      : { sor: utolso.sor, oszlop: utolso.oszlop + 1, polc: utolso.polc, rekesz: 1, max_kapacitas: utolsoKap };
   const mezo = (nev, cimke) => `<label class="field"><span>${cimke}</span>
     <input name="${nev}" type="number" min="1" step="1" class="input" value="${alap[nev]}" required></label>`;
+  const javasolt = azonositoJavaslat(alap.sor, alap.polc, alap.oszlop);
 
   modal({
     cim: 'Új rekesz',
     gomb: 'Rekesz létrehozása',
     tartalom: `
-      <div class="field-grid-4">${mezo('sor', 'Sor')}${mezo('oszlop', 'Oszlop')}${mezo('polc', 'Polc')}${mezo('rekesz', 'Rekesz')}</div>
+      <div class="${CONFIG.USE_MOCK ? 'field-grid-4' : 'field-grid-3'}">${mezo('sor', 'Sor')}${mezo('oszlop', 'Oszlop')}${mezo('polc', 'Polc')}${CONFIG.USE_MOCK ? mezo('rekesz', 'Rekesz') : ''}</div>
+      <label class="field"><span>Azonosító${CONFIG.USE_MOCK ? ' (nem kötelező)' : ''}</span>
+        <input name="azonosito" class="input" maxlength="${MAX_AZONOSITO}" value="${CONFIG.USE_MOCK ? '' : esc(javasolt)}" autocomplete="off" ${CONFIG.USE_MOCK ? '' : 'required'}>
+      </label>
       ${mezo('max_kapacitas', 'Kapacitás (db)')}
-      <p class="hint">Az új rekesz üresen jön létre, bevételezéskor bármely alkatrész elhelyezhető benne.
-      A kapacitás a rekesz fizikai korlátja; bevételezéskor ez és az alkatrész „max. darab / rekesz” értéke közül a kisebb érvényes.</p>`,
+      <p class="hint">Az új rekesz üresen jön létre. A feladat szerint a sor, az oszlop és a polc együtt határoz meg egy rekeszt;
+      az azonosító embereknek szóló, rövid név (például A1-1 = 1. sor, 1. polc, 1. oszlop).
+      Bevételezéskor a rekesz kapacitása és az alkatrész „max. darab / rekesz” értéke közül a kisebb érvényes.
+      Egy rekeszbe csak egyféle alkatrész tehető.</p>`,
     kuldes: async form => {
+      const azonosito = form.elements.azonosito.value.trim();
+      if (azonosito.length > MAX_AZONOSITO) throw new Error(`Az azonosító legfeljebb ${MAX_AZONOSITO} karakter.`);
+      if (!CONFIG.USE_MOCK && !azonosito) {
+        form.elements.azonosito.focus();
+        throw new Error('Add meg a rekesz azonosítóját.');
+      }
       const uj = {
         sor: egeszSzam(form, 'sor', 'Sor', 1),
         oszlop: egeszSzam(form, 'oszlop', 'Oszlop', 1),
         polc: egeszSzam(form, 'polc', 'Polc', 1),
-        rekesz: egeszSzam(form, 'rekesz', 'Rekesz', 1),
+        rekesz: CONFIG.USE_MOCK ? egeszSzam(form, 'rekesz', 'Rekesz', 1) : 1,
         max_kapacitas: egeszSzam(form, 'max_kapacitas', 'Kapacitás', 1),
+        azonosito,
       };
-      if (rekeszek.some(r => helyRendez(r, uj) === 0)) throw new Error(`A(z) ${helyKod(uj)} hely már létezik.`);
+      if (CONFIG.USE_MOCK) {
+        if (rekeszek.some(r => r.sor === uj.sor && r.oszlop === uj.oszlop && r.polc === uj.polc && r.rekesz === uj.rekesz)) {
+          throw new Error(`A(z) ${helyKod({ ...uj, azonosito: '' })} hely már létezik.`);
+        }
+      } else if (rekeszek.some(r => r.sor === uj.sor && r.oszlop === uj.oszlop && r.polc === uj.polc)) {
+        throw new Error(`A(z) ${uj.sor}. sor, ${uj.oszlop}. oszlop, ${uj.polc}. polc helyen már van rekesz.`);
+      }
+      if (azonosito && rekeszek.some(r => r.azonosito.toLowerCase() === azonosito.toLowerCase())) {
+        throw new Error('Ez a rekeszazonosító már létezik.');
+      }
       await Api.ujRekesz(uj);
-      toast(`Rekesz létrehozva: ${helyKod(uj)}`);
+      toast(`Rekesz létrehozva: ${helyCimke({ ...uj, azonosito })}`);
+      frissit();
+    },
+  });
+
+  if (!CONFIG.USE_MOCK) {
+    const form = $('#modal form');
+    const azon = form.elements.azonosito;
+    const frissAz = () => {
+      if (azon.dataset.kezzel) return;
+      const sor = Number(form.elements.sor.value);
+      const polc = Number(form.elements.polc.value);
+      const oszlop = Number(form.elements.oszlop.value);
+      if ([sor, polc, oszlop].every(n => Number.isInteger(n) && n >= 1)) {
+        azon.value = azonositoJavaslat(sor, polc, oszlop);
+      }
+    };
+    ['sor', 'polc', 'oszlop'].forEach(nev => form.elements[nev].addEventListener('input', frissAz));
+    azon.addEventListener('input', () => { azon.dataset.kezzel = '1'; });
+  }
+}
+
+function kapacitasModal(r, alkatresz) {
+  const jelenlegi = Number.isFinite(r.max_kapacitas) ? r.max_kapacitas : '';
+  modal({
+    cim: 'Rekesz kapacitása',
+    gomb: 'Kapacitás mentése',
+    tartalom: `
+      <p class="modal-subject">${esc(helyCimke(r))}</p>
+      <label class="field"><span>Maximális darab ebben a rekeszben</span>
+        <input name="max_kapacitas" type="number" min="${Math.max(1, r.darab)}" step="1" class="input" value="${jelenlegi}" required>
+      </label>
+      <p class="hint">Jelenleg <b>${fmtDb(r.darab)}</b> van a rekeszben${alkatresz ? ` (${esc(alkatresz.nev)}, alkatrész-maximum ${fmtDb(alkatresz.max_darab)} / rekesz)` : ''}.
+      A kapacitás ennél nem lehet kisebb. Bevételezéskor ez és az alkatrész saját maximuma közül a kisebb a határ.</p>`,
+    kuldes: async form => {
+      const max_kapacitas = egeszSzam(form, 'max_kapacitas', 'Kapacitás', 1);
+      if (max_kapacitas < r.darab) {
+        throw new Error(`A kapacitás legalább ${fmtSzam(r.darab)} legyen, mert ennyi darab már a rekeszben van.`);
+      }
+      if (max_kapacitas === r.max_kapacitas) return;
+      await Api.modositRekesz(r.id, { max_kapacitas });
+      toast(`${helyCimke(r)} kapacitása: ${fmtDb(max_kapacitas)}`);
       frissit();
     },
   });
@@ -898,7 +1021,10 @@ function ujRekeszModal(rekeszek) {
 
 function hianyzoNezet(el, { hianyzo, alkatreszek }) {
   if (!hianyzo.length) {
-    el.innerHTML = uresAllapot('Nincs hiányzó alkatrész', 'Minden projekthez igényelt alkatrész le van foglalva.');
+    el.innerHTML = uresAllapot(
+      'Nincs rendelendő alkatrész',
+      'Az aktív projektek igényét a jelenlegi raktárkészlet fedezi. A már lefoglalt darabot nem kell újra megrendelni.'
+    );
     return;
   }
 
@@ -907,23 +1033,37 @@ function hianyzoNezet(el, { hianyzo, alkatreszek }) {
   const ertek = h => h.hianyzo_darab * (alk.get(h.alkatresz_id)?.ar ?? 0);
   const projektek = new Set(sorok.flatMap(h => h.projektek.map(p => p.id)));
 
+  const projektLista = h => {
+    if (!h.projektek.length) {
+      return '<span class="muted">A lefoglalt mennyiség nagyobb, mint a készlet – ellenőrizd a foglalásokat.</span>';
+    }
+    const lista = `<ul class="proj-list">${h.projektek.map(p => `
+      <li>${statusz(p.statusz)} <span>${esc(p.nev)}</span> <span class="muted">– ${fmtDb(p.darab)} nincs fedezve</span></li>`).join('')}
+    </ul>`;
+    const beragadt = h.szabad_maradt > 0
+      ? `<p class="hint">${fmtDb(h.szabad_maradt)} db szabad készlet nem párosítható, mert a soron következő tétel csak egyben foglalható le. A rendelendő mennyiség ettől függetlenül az összes igény és a teljes készlet különbsége.</p>`
+      : '';
+    return lista + beragadt;
+  };
+
   el.innerHTML = `
     <div class="stats-grid">
-      ${stat('Hiányzó alkatrésztípus', fmtSzam(sorok.length), 'red', '⚠')}
-      ${stat('Hiányzó darab összesen', fmtDb(osszeg(sorok, h => h.hianyzo_darab)), 'orange', '▤')}
+      ${stat('Rendelendő alkatrésztípus', fmtSzam(sorok.length), 'red', '⚠')}
+      ${stat('Rendelendő darab', fmtDb(osszeg(sorok, h => h.hianyzo_darab)), 'orange', '▤')}
       ${stat('Becsült beszerzési érték', fmtFt(osszeg(sorok, ertek)), 'blue', 'Ft')}
       ${stat('Érintett projekt', fmtSzam(projektek.size), 'green', '☀')}
     </div>
     <div class="card">
-      ${tablaFejlec('Hiányzó alkatrészek', 'A hiányzó mennyiség szerint csökkenő sorrendben')}
+      ${tablaFejlec('Hiányzó alkatrészek', 'Rendelendő = aktív igény − raktárkészlet. A készletből már lefoglalt darab benne van a készletben, ezért nem szerepel újra.')}
       <div class="table-wrap">
         <table class="table">
           <thead><tr>
             <th>Alkatrész</th>
-            <th class="num">Hiányzik</th>
-            <th class="num">Szabad készlet</th>
+            <th class="num">Rendelendő</th>
+            <th class="num">Készlet</th>
+            <th class="num">Ebből lefoglalva</th>
             <th class="num">Érték</th>
-            <th>Érintett projektek</th>
+            <th>Ki nem elégített igény</th>
             <th></th>
           </tr></thead>
           <tbody id="hianyzo-sorok">
@@ -932,11 +1072,10 @@ function hianyzoNezet(el, { hianyzo, alkatreszek }) {
               return `<tr>
                 <td class="strong">${esc(h.nev)}</td>
                 <td class="num strong text-danger">${fmtDb(h.hianyzo_darab)}</td>
-                <td class="num">${a ? fmtDb(Math.max(0, a.keszlet - a.lefoglalt)) : '–'}</td>
+                <td class="num">${fmtDb(h.keszlet)}</td>
+                <td class="num">${fmtDb(h.lefoglalt)}</td>
                 <td class="num">${a ? fmtFt(ertek(h)) : '–'}</td>
-                <td>${h.projektek.length ? `<ul class="proj-list">${h.projektek.map(p => `
-                  <li>${statusz(p.statusz)} <span>${esc(p.nev)}</span> <span class="muted">– ${fmtDb(p.darab)}</span></li>`).join('')}
-                  </ul>` : '<span class="muted">–</span>'}</td>
+                <td>${projektLista(h)}</td>
                 <td class="num"><button type="button" class="row-action"
                   data-bevetelez="${h.alkatresz_id}" data-darab="${h.hianyzo_darab}">Bevételezés →</button></td>
               </tr>`;
@@ -949,11 +1088,71 @@ function hianyzoNezet(el, { hianyzo, alkatreszek }) {
   $('#hianyzo-sorok').addEventListener('click', bevetelezesGomb);
 }
 
+/* ---------- 4/b. Előfoglalt hiányok (B.4) ---------- */
+
+function elofoglaltNezet(el, { elofoglalt, alkatreszek }) {
+  if (!elofoglalt.length) {
+    el.innerHTML = uresAllapot(
+      'Nincs készletre váró előfoglalás',
+      'A Wait és Draft projektek minden előfoglalását fedezi a szabad készlet, vagy még nincs ilyen igény. A készletből már elkülönített tételek a „Lefoglalt alkatrészek” menüben vannak.'
+    );
+    return;
+  }
+
+  const alk = new Map(alkatreszek.map(a => [a.id, a]));
+  const sorok = [...elofoglalt].sort((x, y) => y.elofoglalt_darab - x.elofoglalt_darab || huRendez(x.nev, y.nev));
+  const projektek = new Set(sorok.flatMap(h => h.projektek.map(p => p.id)));
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      ${stat('Előfoglalt alkatrésztípus', fmtSzam(sorok.length), 'red', '⚑')}
+      ${stat('Készletre váró darab', fmtDb(osszeg(sorok, h => h.elofoglalt_darab)), 'orange', '▤')}
+      ${stat('Becsült érték', fmtFt(osszeg(sorok, h => h.elofoglalt_darab * (alk.get(h.alkatresz_id)?.ar ?? 0))), 'blue', 'Ft')}
+      ${stat('Váró projekt', fmtSzam(projektek.size), 'green', '☀')}
+    </div>
+    <div class="card">
+      ${tablaFejlec('Hiányzó, de már előre lefoglalt alkatrészek',
+        'Wait, majd Draft projektek: az igény leadva, de a szabad készlet nem fedezi a teljes tételt. Bevételezéskor ezek kapják meg először az új árut.')}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr>
+            <th>Alkatrész</th>
+            <th class="num">Készletre vár</th>
+            <th class="num">Raktáron</th>
+            <th>Előfoglalás projektenként</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="elofoglalt-sorok">
+            ${sorok.map(h => `<tr>
+              <td class="strong">${esc(h.nev)}</td>
+              <td class="num strong text-danger">${fmtDb(h.elofoglalt_darab)}</td>
+              <td class="num">${fmtDb(h.keszlet)}</td>
+              <td><ul class="proj-list">${h.projektek.map(p => `
+                <li>${statusz(p.statusz)} <span>${esc(p.nev)}</span>
+                  <span class="muted">– igény ${fmtDb(p.igenyelt ?? p.darab)}, készletből lefoglalva ${fmtDb(p.lefoglalt ?? 0)}, hiányzik ${fmtDb(p.darab)}</span>
+                </li>`).join('')}
+              </ul>${h.szabad_maradt > 0
+                ? `<p class="hint">${fmtDb(h.szabad_maradt)} szabad készlet nem párosítható: a tétel csak egyben foglalható le.</p>`
+                : ''}</td>
+              <td class="num"><button type="button" class="row-action"
+                data-bevetelez="${h.alkatresz_id}" data-darab="${h.elofoglalt_darab}">Bevételezés →</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  $('#elofoglalt-sorok').addEventListener('click', bevetelezesGomb);
+}
+
 /* ---------- 5. Lefoglalt alkatrészek ---------- */
 
 function lefoglaltNezet(el, { lefoglalt, alkatreszek }) {
   if (!lefoglalt.length) {
-    el.innerHTML = uresAllapot('Nincs lefoglalt alkatrész', 'Jelenleg egyetlen projekthez sincs készlet lefoglalva.');
+    el.innerHTML = uresAllapot(
+      'Nincs készletből lefoglalt alkatrész',
+      'Jelenleg egyetlen projekthez sincs raktáron lévő készlet elkülönítve. A készletre váró előfoglalások az „Előfoglalt hiányok” menüben vannak.'
+    );
     return;
   }
 
@@ -1068,13 +1267,20 @@ function frissit() {
 }
 
 async function frissitJelvenyek() {
-  const jelveny = $('#badge-hianyzo');
+  const hianyJelveny = $('#badge-hianyzo');
+  const eloJelveny = $('#badge-elofoglalt');
   try {
-    const hianyzo = await Api.hianyzoAlkatreszek();
-    jelveny.textContent = hianyzo.length;
-    jelveny.hidden = hianyzo.length === 0;
+    const [hianyzo, elofoglalt] = await Promise.all([
+      Api.hianyzoAlkatreszek(),
+      Api.elofoglaltAlkatreszek(),
+    ]);
+    hianyJelveny.textContent = hianyzo.length;
+    hianyJelveny.hidden = hianyzo.length === 0;
+    eloJelveny.textContent = elofoglalt.length;
+    eloJelveny.hidden = elofoglalt.length === 0;
   } catch {
-    jelveny.hidden = true;
+    hianyJelveny.hidden = true;
+    eloJelveny.hidden = true;
   }
 }
 
@@ -1092,18 +1298,38 @@ async function inditas() {
   let user;
   try {
     user = await Api.me();
-  } catch {
-    // nincs bejelentkezve (401) vagy nem érhető el a szerver – a belépő oldal jelzi az okát
+  } catch (err) {
+    // 401: nincs munkamenet. Más hiba (a szerver nem elérhető): maradjunk az oldalon,
+    // különben éles módban a közös belépőre esnénk, ami innen nem magyarázza el az okot.
+    if (err instanceof ApiError && err.status !== 401) {
+      document.body.classList.remove('auth-pending');
+      document.title = 'Nincs kapcsolat – Raktárvezetői felület';
+      $('#page-title').textContent = 'Nincs kapcsolat';
+      $('#page-sub').textContent = 'A raktárvezetői felület nem éri el a szervert';
+      $('#view').innerHTML = hibaAllapot(err);
+      $('#view').addEventListener('click', e => {
+        if (e.target.closest('[data-ujra]')) location.reload();
+      });
+      return;
+    }
     Api.bejelentkezesre();
     return;
   }
   if (user.role !== CONFIG.ENGEDETT_SZEREPKOR) {
-    await Api.logout().catch(() => {});
-    Api.bejelentkezesre();
+    if (CONFIG.USE_MOCK) {
+      await Api.logout().catch(() => {});
+      Api.bejelentkezesre('#nincs-jog');
+    } else {
+      // Ne jelentkeztessük ki: a közös belépő a saját felületére viszi.
+      location.replace('../belepes/');
+    }
     return;
   }
   felhasznaloMegjelenites(user);
   document.body.classList.remove('auth-pending');
+  if (user.eredetiSzerepkor && user.eredetiSzerepkor !== user.role) {
+    toast('A fiók szerepköre még a régi magyar érték. A bevételezéshez futtasd a napelemrendszer_illesztes.sql-t.', 'info');
+  }
 
   const mod = $('#mode-badge');
   const reset = $('#reset-demo');

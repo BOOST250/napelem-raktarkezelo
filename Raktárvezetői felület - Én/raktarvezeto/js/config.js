@@ -3,11 +3,12 @@
 const CONFIG = {
   // Az adatvégpontok mappája (Eszter backendje): parts.php, bins.php,
   // projects.php, project_parts.php, receiving.php.
-  // Részletek: README.md → "API-szerződés"
-  API_BASE: '/napelem/api',
+  // A felület a napelem/raktarvezeto/ mappából fut, az API a napelem/api/.
+  // Felülírható: index.html?api=http://localhost/napelem/api
+  API_BASE: '../api',
 
   // A bejelentkezési végpontok mappája (login.php, me.php, logout.php – PHP session).
-  AUTH_BASE: '/napelem/api',
+  AUTH_BASE: '../api',
 
   // Ezzel a szerepkörrel lehet belépni erre a felületre.
   ENGEDETT_SZEREPKOR: 'warehouse_manager',
@@ -28,8 +29,14 @@ const SZEREPKOR_NEV = {
   warehouse_worker: 'Raktáros',
 };
 
-// URL-ből felülírható: index.html?mock=0 (valódi API) vagy index.html?mock=1 (demo)
+// URL-ből felülírható: ?mock=1 (demo), ?mock=0 (éles), ?api=… és ?auth=…
 (function () {
-  const mock = new URLSearchParams(location.search).get('mock');
-  if (mock !== null) CONFIG.USE_MOCK = mock !== '0';
+  const q = new URLSearchParams(location.search);
+  const mock = q.get('mock');
+  if (mock !== null) CONFIG.USE_MOCK = mock !== '0' && mock !== 'false';
+  const api = q.get('api');
+  if (api) CONFIG.API_BASE = api.replace(/\/$/, '');
+  const auth = q.get('auth');
+  if (auth) CONFIG.AUTH_BASE = auth.replace(/\/$/, '');
+  else if (api) CONFIG.AUTH_BASE = CONFIG.API_BASE;
 })();

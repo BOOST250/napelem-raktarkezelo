@@ -163,6 +163,7 @@ code { font: 12px Consolas, monospace; background: var(--surface-2); padding: 1p
   line-height: 18px;
   text-align: center;
 }
+.nav-badge.warn { background: var(--orange); }
 
 /* Oldalsáv alja */
 .sidebar-bottom {
@@ -515,6 +516,7 @@ select.input { cursor: pointer; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
 .field-row.wide-first { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
 .field-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 12px; }
+.field-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 12px; }
 .hint { font-size: 12px; color: var(--text-light); }
 
 .form-error {
@@ -595,7 +597,7 @@ select.input { cursor: pointer; }
 
 .content-card + .content-card { margin-top: 20px; }
 .plan td { padding-top: 10px; padding-bottom: 10px; }
-.plan select.input { min-width: 230px; }
+.plan select.input { min-width: 280px; }
 .plan tr.invalid td { background: var(--red-soft); }
 .plan tr.invalid .qty { border-color: var(--red); }
 .plan-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-top: 16px; }
@@ -622,6 +624,7 @@ select.input { cursor: pointer; }
 .bin.empty { border-style: dashed; background: var(--surface-2); }
 .bin.is-full { border-color: #bbf7d0; }
 .bin-loc { font-size: 11px; font-weight: bold; line-height: 1.3; letter-spacing: .3px; color: var(--text-light); }
+.bin-coords { margin-top: 2px; font-size: 11px; color: var(--text-light); }
 .bin-name {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -635,6 +638,7 @@ select.input { cursor: pointer; }
 }
 .bin.empty .bin-name { min-height: 0; margin-bottom: 0; font-weight: normal; }
 .bin-qty { margin-top: 6px; font-size: 11px; color: var(--text-light); text-align: right; font-variant-numeric: tabular-nums; }
+.bin-actions { margin-top: 8px; text-align: right; }
 
 
 /* =========================================
@@ -761,7 +765,7 @@ dialog::backdrop { background: rgba(17, 24, 39, .5); }
   .filter-note { padding-bottom: 0; }
 
   .field-row, .field-row.wide-first { grid-template-columns: minmax(0, 1fr); }
-  .field-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .field-grid-4, .field-grid-3 { grid-template-columns: repeat(2, 1fr); }
   .pad, .content-card { padding: 18px; }
 }
 

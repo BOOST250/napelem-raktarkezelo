@@ -1,137 +1,81 @@
-# Raktárvezetői felület (3. fő – Frontend)
+# Raktárvezetői felület
 
-Sima HTML + CSS + JavaScript, keretrendszer és telepítés nélkül. A szerverrel `fetch`-csel kommunikál (`js/api.js`).
+Sima HTML + CSS + JavaScript, keretrendszer nélkül. A szerverrel `fetch`-csel kommunikál (`js/api.js`). A felület szövege magyar.
+
+A feladatkiírás B. pontjai:
+
+| Követelmény | Hol |
+|---|---|
+| B.1 Új alkatrész (név, ár, max. darab / rekesz) | **Alkatrészek** → „+ Új alkatrész” |
+| B.2 Árak módosítása | **Alkatrészek** → „Módosítás” |
+| B.3 Hiányzó alkatrészek, a lefoglalások figyelembevételével (rendeléshez) | **Hiányzó alkatrészek** – rendelendő = aktív igény − raktárkészlet |
+| B.4 Hiányzó, de már előre lefoglalt alkatrészek | **Előfoglalt hiányok** – Wait és Draft projektek készletre váró előfoglalása |
+| B.5 Bevételezés, rekesz meghatározásával | **Bevételezés** – javaslat, szerkeszthető rekesz és mennyiség |
+| B.6 Rekesz maximális darabszáma | **Rekeszek** → „Kapacitás”, új rekesznél is; bevételezéskor az alkatrész maximumával együtt érvényes |
+| Készletből már lefoglalt tételek (a kiírás külön kéri a lefoglaltak listázását is) | **Lefoglalt alkatrészek** |
+
+Az előfoglalás nem ugyanaz, mint a készletből való lefoglalás. Előfoglalás: a projekt igénye már le van adva (Wait, vagy még Draft), de a szabad készlet nem fedezi a teljes tételt, ezért a beérkező árura vár. A készletből lefoglalt tétel már a raktárban van, projekthez kötve.
 
 ## Futtatás
 
-**Demo mód (backend nélkül)** – alapértelmezett (`js/config.js` → `USE_MOCK: true`):
-- Nyisd meg az `index.html`-t böngészőben, vagy tedd a mappát a XAMPP `htdocs` alá és nyisd meg `http://localhost/.../raktarvezeto/`.
-- Beépített tesztadatokkal működik (8 alkatrész, 24 rekesz, 5 projekt), a módosítások a böngészőben (localStorage) maradnak.
-- A bal alsó **„Demo adatok visszaállítása”** gomb visszaállítja a kezdőállapotot.
+**Éles mód** az alapértelmezés (`js/config.js` → `USE_MOCK: false`). A felület a `napelem/raktarvezeto/` mappából hívja a `napelem/api/` végpontokat (`API_BASE: '../api'`).
 
-**Éles mód (az 1. fő PHP API-jával)**:
-1. `js/config.js`: `API_BASE` = a PHP API címe, `USE_MOCK: false`
-2. vagy módosítás nélkül: `index.html?mock=0` (vissza demóra: `?mock=1`)
+1. XAMPP: Apache és MySQL.
+2. Importáld a `napelemrendszer.sql` fájlt, utána a `napelemrendszer_illesztes.sql` fájlt. A második nélkül a szerepkörök magyar enum-értékek (`raktarvezeto`), a bevételezés viszont `warehouse_manager`-t vár.
+3. A mappa a `htdocs/napelem/raktarvezeto/` helyre kerüljön, az API pedig `htdocs/napelem/api/`.
+4. Nyisd meg `http://localhost/napelem/belepes/` címen, és `raktarvezeto1` / `Z12356` fiókkal lépj be (a dump jelszava; első belépéskor a backend hash-eli).
+5. Csak `warehouse_manager` maradhat ezen a felületen. Más szerepkör a közös belépőre kerül vissza, kijelentkeztetés nélkül, hogy a saját felületére jusson.
 
-## Bejelentkezés
+Más címről (például `python -m http.server`) az API így adható meg: `index.html?api=http://localhost/napelem/api`. A böngészőt ne `file://` alól nyisd meg: a session-süti úgy nem megy el. A lap és az API legyen ugyanaz a host (`localhost` a `localhosttal`, ne keverd a `127.0.0.1`-gyel), különben a SameSite süti nem jut el a kéréshez.
 
-A felület csak bejelentkezés után érhető el, és csak **raktárvezető** (`warehouse_manager`) szerepkörrel. Bejelentkezés nélkül az `index.html` a `login.html`-re irányít. Regisztráció nincs, a felhasználókat az adminisztrátor veszi fel.
-
-**Demo mód** – beépített tesztfelhasználók (a login oldalon rájuk kattintva kitöltődik az űrlap):
+**Demo mód** backend nélkül: `index.html?mock=1` (vissza élesre: `?mock=0`). Nyolc alkatrész, 24 rekesz, öt projekt, a módosítás a `localStorage`-ban marad (`raktarvezeto_demo_v2`). A bal alsó **„Demo adatok visszaállítása”** a kezdőadatot hozza vissza, kijelentkeztetés nélkül.
 
 | Felhasználónév | Jelszó | Szerepkör | Beléphet? |
 |---|---|---|---|
 | `raktarvezeto` | `raktar123` | Raktárvezető | igen |
-| `szakember` | `szakember123` | Szakember | nem – jogosultsági hiba |
-| `raktaros` | `raktaros123` | Raktáros | nem – jogosultsági hiba |
+| `szakember` | `szakember123` | Szakember | nem |
+| `raktaros` | `raktaros123` | Raktáros | nem |
 
-A demo munkamenet a localStorage-ban van, a „Demo adatok visszaállítása” nem jelentkeztet ki.
+## Amit a felület az API-tól vár
 
-**Éles mód** – PHP session (cookie) a 2. fő backendjében (`napelem/auth/Auth.php`):
-- `js/config.js` → `AUTH_BASE` = az auth-végpontok mappája (alapból `/napelem/api`).
-- A frontendet `http://localhost…` címről nyisd meg (pl. XAMPP `htdocs` vagy `localhost:8123`), **ne dupla kattintással** – `file://` alól a böngésző nem küldi el a session-cookie-t.
-- Kezdő felhasználó felvétele: `POST users.php` `{"username":"admin", "password":"…", "role":"warehouse_manager"}` – a jelszó már hash-elve kerül az adatbázisba. A régi, sima szövegként mentett jelszavak is működnek: első belépéskor automatikusan hash-re cserélődnek.
+Az `app.js` magyar kulcsokkal dolgozik. Az `api.js` éles módban Eszter fájljaira fordít. Lista jöhet tömbként vagy `{"data":[...]}` alakban. A szám lehet string (a mysqli így adja). Hiba: 4xx/5xx és `{"error":"…"}`. A `{"success":false}` válasz HTTP 200 mellett is hiba.
 
-| | |
+| Felület | HTTP |
 |---|---|
-| `POST login.php` | kérés: `{"username":"...", "password":"..."}` → `{"user":{"id":1, "username":"...", "role":"warehouse_manager"}}`; 400 hiányzó mező, 401 hibás adatok |
-| `GET me.php` | `{"user":{...}}` vagy 401, ha nincs bejelentkezve |
-| `POST logout.php` | `{"ok":true}` – munkamenet törlése |
+| Belépés | `POST login.php` `{"username","password"}` → `{"user":{"id","username","role"}}` |
+| Munkamenet | `GET me.php` → `{"user":…}` vagy 401 |
+| Kilépés | `POST logout.php` → `{"ok":true}` |
+| Alkatrészek | `GET/POST parts.php`, `PUT parts.php?id=` – mezők: `name`, `price`, `max_per_bin` |
+| Rekeszek | `GET/POST bins.php`, `PUT bins.php?id=` – `row_num`, `col_num`, `level_num`, `identifier`, `max_capacity`, `part_id`, `quantity` |
+| Készlet és foglalás | `GET projects.php`, `GET project_parts.php` – a felület ezekből számol |
+| Bevételezés | `POST receiving.php` `{"part_id","items":[{"bin_id","quantity"}]}` → `reserved`, `scheduled_projects` |
 
-Ezek a végpontok a kérő `Origin`-t küldik vissza `Access-Control-Allow-Credentials: true` mellett (cookie-hoz a `*` nem engedett), és a frontend csak ezeket hívja `credentials: 'include'`-dal. A többi végpont (`parts`, `bins` …) még nincs védve; ehhez az elejükre kell: `$auth = new Auth($conn); $auth->requireLogin(['warehouse_manager']);` (401 / 403 – a frontend 401-re a login oldalra irányít).
+A rekesz azonosítója szöveg (`A1-1`: sor betűje, polc, oszlop), nem sorszám. Üres rekesz: `part_id` null. Egy rekeszbe csak egyféle alkatrész kerülhet. A bevételezés határa a rekesz `max_capacity` és az alkatrész `max_per_bin` közül a kisebb.
 
-## Követelmények → hol találod
+A hiányzó lista (B.3) az aktív projektek igénye mínusz a fizikai készlet. A lezárt (`Completed`, `Failed`) projekt nem számít. Az előfoglalt hiány (B.4) a Wait, majd a Draft sorokból az a rész, amit a szabad készlet nem fedez. Éles módban a `reserved` mező igen/nem: a `receiving.php` csak teljes tételt foglal, ezért egy kisebb szabad készlet „beragadhat” a következő, nagyobb előfoglalás mellett. A rendelendő mennyiség ettől függetlenül az igény és a teljes készlet különbsége.
 
-| Követelmény | Menüpont |
-|---|---|
-| Új alkatrész felvétele | **Alkatrészek** → „+ Új alkatrész” |
-| Árak módosítása | **Alkatrészek** → „Módosítás” |
-| Rekesz maximális kapacitás kezelése | **Alkatrészek** → „Módosítás” (max. db / rekesz), bevételezéskor ellenőrizve; **Rekeszek** → telítettség, „+ Új rekesz” |
-| Bevételezés (rekesz + készlet) | **Bevételezés** – automatikus elhelyezési javaslat, szerkeszthető rekesz / mennyiség |
-| Hiányzó alkatrészek listázása | **Hiányzó alkatrészek** (+ „Bevételezés →” gyorsgomb) |
-| Lefoglalt alkatrészek listázása | **Lefoglalt alkatrészek** (projekt vagy alkatrész szerint) |
-| Kommunikáció az API-val (fetch) | `js/api.js` – minden hívás itt van |
+A kérések `credentials: 'include'`-dal mennek. 401-re a felület a belépőre visz. 403-nál a hibaüzenet marad a képernyőn.
 
 ## Fájlok
 
 ```
 raktarvezeto/
 ├── index.html      oldalváz, menü
-├── login.html      bejelentkező oldal
-├── css/style.css   megjelenés (világos/sötét téma, mobil nézet)
-├── js/config.js    API cím, demo mód kapcsoló, engedett szerepkör
-├── js/api.js       fetch hívások + válaszok egységesítése, login/me/logout
-├── js/mock.js      demo backend + demo felhasználók (csak demo módban)
-├── js/login.js     bejelentkezés logikája
-└── js/app.js       nézetek, űrlapok, logika, belépés-ellenőrzés
+├── login.html      saját belépő (csak demo módban)
+├── css/style.css   megjelenés, mobil nézet
+├── js/config.js    API-cím, demo kapcsoló, engedett szerepkör
+├── js/api.js       fetch, mezőfordítás, B.3/B.4 számítás
+├── js/mock.js      demo adatok (csak demo módban)
+├── js/login.js     demo belépés
+└── js/app.js       nézetek, űrlapok, belépés-ellenőrzés
 ```
 
----
+## Ismert backend-eltérések
 
-## API-szerződés (az 1. fő backendjéhez)
+Ezeket ez a mappa nem javítja; Eszter `napelem` mappájában kell megoldani. Részletesen a pull request leírásában is szerepelnek.
 
-A frontend ezeket a végpontokat hívja. Az URL = `API_BASE` + útvonal, pl.
-`http://localhost/raktar/api/index.php/alkatreszek` – így PHP-ban `$_SERVER['PATH_INFO']` = `/alkatreszek`, `.htaccess` sem kell.
-
-**Általános szabályok**
-- Kérés és válasz JSON (UTF-8). POST/PUT törzse: `json_decode(file_get_contents('php://input'), true)`.
-- Hiba esetén 4xx/5xx HTTP kód + `{"error": "Magyar nyelvű üzenet"}` – a felület ezt írja ki.
-- A számok jöhetnek stringként is (PDO alapból így adja), a frontend átalakítja. Listát adhatsz sima tömbként vagy `{"data": [...]}` formában.
-- Az oszlopnevek eltérhetnek, csak a JSON-ban legyenek ezek a kulcsok (`SELECT ... AS max_darab`).
-
-### Alkatrészek
-| | |
-|---|---|
-| `GET /alkatreszek` | `[{"id":1, "nev":"Napelem panel 410W", "ar":52000, "max_darab":10, "keszlet":26, "lefoglalt":26}]` |
-| `POST /alkatreszek` | kérés: `{"nev":"...", "ar":52000, "max_darab":10}` → válasz: a létrehozott alkatrész |
-| `PUT /alkatreszek/{id}` | kérés: `{"ar":49900, "max_darab":10}` → válasz: a módosított alkatrész |
-
-- `max_darab` = legfeljebb hány darab fér **egy rekeszbe** ebből az alkatrészből.
-- `keszlet` = a rekeszekben lévő darabok összege; `lefoglalt` = aktív projektekhez lefoglalt darabszám.
-- PUT: 409, ha `max_darab` kisebb lenne, mint amennyi valamelyik rekeszben már van. POST: 409 ha a név már létezik.
-
-### Rekeszek
-| | |
-|---|---|
-| `GET /rekeszek` | `[{"id":1, "sor":1, "oszlop":1, "polc":1, "rekesz":1, "alkatresz_id":1, "darab":10}]` – üres rekesznél `alkatresz_id: null`, `darab: 0` |
-| `POST /rekeszek` | kérés: `{"sor":2, "oszlop":3, "polc":2, "rekesz":3}` → üres rekesz jön létre; 409 ha a hely már létezik |
-
-### Bevételezés
-`POST /bevetelezes`
-```json
-{ "alkatresz_id": 1, "tetelek": [ { "rekesz_id": 3, "darab": 4 }, { "rekesz_id": 4, "darab": 10 } ] }
-```
-A backend feladata:
-1. Ellenőrzés (hiba esetén semmit ne módosítson): a rekesz üres vagy ugyanez az alkatrész van benne; `jelenlegi + darab ≤ max_darab`.
-2. Rekeszek frissítése (`alkatresz_id`, `darab`).
-3. Az új szabad készletből foglalás a hiányos projektekhez (előbb `Wait`, aztán `Draft`).
-4. Ha egy `Wait` projekt minden alkatrésze le van foglalva → státusza `Scheduled`.
-
-Válasz (a `lefoglalva` és `utemezett_projektek` opcionális, értesítéshez használjuk):
-```json
-{ "ok": true, "lefoglalva": 14, "utemezett_projektek": [ { "id": 2, "nev": "Nagy és Társa Kft. – Budaörs" } ] }
-```
-
-### Hiányzó alkatrészek
-`GET /hianyzo` – alkatrészenként, ahol az igényelt > lefoglalt (aktív projekteknél):
-```json
-[ { "alkatresz_id": 1, "nev": "Napelem panel 410W", "hianyzo_darab": 14,
-    "projektek": [ { "id": 2, "nev": "Nagy és Társa Kft. – Budaörs", "statusz": "Wait", "darab": 6 } ] } ]
-```
-
-### Lefoglalt alkatrészek
-`GET /lefoglalt` – egy sor = egy projekt egy alkatrésze, ahol van foglalás (`igenyelt` opcionális):
-```json
-[ { "projekt_id": 1, "projekt_nev": "Kovács család – Érd", "statusz": "Scheduled",
-    "alkatresz_id": 1, "nev": "Napelem panel 410W", "darab": 12, "igenyelt": 12 } ]
-```
-
-### PHP fejléc (index.php elejére)
-Kell, ha a frontend nem ugyanarról a címről fut, mint az API (pl. dupla kattintással megnyitva):
-```php
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
-```
+- Üres rekesz felvétele `bins.php`-ban elbukik: a `part_id` NULL értéket az `bind_param("i", …)` 0-ra köti, az idegen kulcs ezt elutasítja. A NULL-t külön, kötés nélkül kell beszúrni.
+- A `parts.php` és a `bins.php` bármely bejelentkezett szerepkört beenged (`kotelezo_bejelentkezes()` szerep nélkül), és a módosító metódusokat sem köti `warehouse_manager`-hez. A `PUT` nem ad 409-et, ha az új maximum kisebb, mint a rekeszben lévő mennyiség.
+- Ismételt alkatrésznév vagy rekeszazonosító HTTP 500 és angol SQL-szöveg (a felület lefordítja, de a helyes válasz 409 lenne).
+- A `users.role` a nyers dumpban magyar. Az illesztő SQL nélkül a bevételezés 403.
+- A kiírás szerint a PHP csak objektumorientált keretrendszerrel együtt fogadható el. A mostani API keretrendszer nélküli, procedurális PHP.
