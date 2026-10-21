@@ -127,13 +127,20 @@ INSERT IGNORE INTO `projects`
   (11, 'Szeged, Napfény sor 12.', 'Családi ház, 10 panel', 'Szabó Anna',
        'szabo.anna@example.hu', '+36 30 555 2200', 'Scheduled', 10.50, 105000.00, '2026-09-22 14:30:00');
 
-INSERT IGNORE INTO `project_history` (`project_id`, `status`, `changed_at`) VALUES
-  (10, 'New',       '2026-09-20 09:00:00'),
-  (10, 'Draft',     '2026-09-20 11:15:00'),
-  (10, 'Wait',      '2026-09-21 08:40:00'),
-  (11, 'New',       '2026-09-22 14:30:00'),
-  (11, 'Draft',     '2026-09-22 16:00:00'),
-  (11, 'Scheduled', '2026-09-23 10:05:00');
+INSERT INTO `project_history` (`project_id`, `status`, `changed_at`)
+SELECT v.project_id, v.status, v.changed_at
+FROM (
+  SELECT 10 AS project_id, 'New' AS status, TIMESTAMP '2026-09-20 09:00:00' AS changed_at
+  UNION ALL SELECT 10, 'Draft',     TIMESTAMP '2026-09-20 11:15:00'
+  UNION ALL SELECT 10, 'Wait',      TIMESTAMP '2026-09-21 08:40:00'
+  UNION ALL SELECT 11, 'New',       TIMESTAMP '2026-09-22 14:30:00'
+  UNION ALL SELECT 11, 'Draft',     TIMESTAMP '2026-09-22 16:00:00'
+  UNION ALL SELECT 11, 'Scheduled', TIMESTAMP '2026-09-23 10:05:00'
+) AS v
+WHERE NOT EXISTS (
+  SELECT 1 FROM `project_history` h
+  WHERE h.project_id = v.project_id AND h.status = v.status AND h.changed_at = v.changed_at
+);
 
 -- 3/d  Projekt-alkatrész igények.
 --      `reserved` logikai mező, ezért a foglalás mindent-vagy-semmi:
@@ -166,7 +173,96 @@ ALTER TABLE `users`           AUTO_INCREMENT = 10;
 
 
 -- ---------------------------------------------------------------------
---  5. ELLENŐRZÉS  (az importálás végén kiírja, mi lett az eredmény)
+--  5. JELSZÓHASH, ADMIN, HIÁNYZÓ OSZLOPOK
+--
+--  Újrafuttatható: a jelszó csak akkor cserélődik, ha még a dump
+--  sima szövege. A sémaelemeket csak akkor adjuk hozzá, ha hiányoznak.
+-- ---------------------------------------------------------------------
+
+UPDATE `users` SET `password` = '$2y$10$zyMXFS.fwBnpQnsHZw3YJ.bXEl9bsKmpk3rntKToCb5NS150fEndO'
+  WHERE `username` = 'szakember1' AND `password` = 'A12346';
+UPDATE `users` SET `password` = '$2y$10$3Ttoux/Td.daEE42qsXrluaftFBLOgEmG.KtDGVCnfw.74vH77Gyq'
+  WHERE `username` = 'raktarvezeto1' AND `password` = 'Z12356';
+UPDATE `users` SET `password` = '$2y$10$owpM0uKgRbSoW6kT4uFFEuLMv8wb3p8GoB1ae41PFqtVKFyFbZnX2'
+  WHERE `username` = 'raktaros1' AND `password` = 'U23456';
+
+INSERT INTO `users` (`username`, `password`, `role`)
+SELECT 'admin', '$2y$10$8XFoBJQF96CX9RdRL.PZb.MhXoIJT2M4M8R0IzUxo8Jeexuu0pGC2', 'admin'
+WHERE NOT EXISTS (SELECT 1 FROM `users` WHERE `username` = 'admin');
+
+SET @napelem_van := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'project_parts' AND COLUMN_NAME = 'issued_quantity'
+);
+SET @napelem_ddl := IF(@napelem_van = 0,
+  'ALTER TABLE `project_parts` ADD COLUMN `issued_quantity` INT NOT NULL DEFAULT 0 AFTER `quantity`',
+  'SELECT 1');
+PREPARE napelem_ddl FROM @napelem_ddl;
+EXECUTE napelem_ddl;
+DEALLOCATE PREPARE napelem_ddl;
+
+SET @napelem_van := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'project_history' AND COLUMN_NAME = 'user_id'
+);
+SET @napelem_ddl := IF(@napelem_van = 0,
+  'ALTER TABLE `project_history` ADD COLUMN `user_id` INT NULL DEFAULT NULL AFTER `status`',
+  'SELECT 1');
+PREPARE napelem_ddl FROM @napelem_ddl;
+EXECUTE napelem_ddl;
+DEALLOCATE PREPARE napelem_ddl;
+
+SET @napelem_van := (
+  SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'project_history'
+    AND CONSTRAINT_NAME = 'project_history_user_fk'
+);
+SET @napelem_ddl := IF(@napelem_van = 0,
+  'ALTER TABLE `project_history` ADD CONSTRAINT `project_history_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE napelem_ddl FROM @napelem_ddl;
+EXECUTE napelem_ddl;
+DEALLOCATE PREPARE napelem_ddl;
+
+ALTER TABLE `project_history` MODIFY `status`
+  enum('New','Draft','Wait','Scheduled','InProgress','Completed','Failed') NOT NULL;
+
+SET @napelem_van := (
+  SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND INDEX_NAME = 'projects_status_created'
+);
+SET @napelem_ddl := IF(@napelem_van = 0,
+  'ALTER TABLE `projects` ADD INDEX `projects_status_created` (`status`, `created_at`)',
+  'SELECT 1');
+PREPARE napelem_ddl FROM @napelem_ddl;
+EXECUTE napelem_ddl;
+DEALLOCATE PREPARE napelem_ddl;
+
+CREATE TABLE IF NOT EXISTS `stock_movements` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `part_id` int(11) NOT NULL,
+  `bin_id` int(11) DEFAULT NULL,
+  `project_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `movement_type` enum('receive','issue','adjust') NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `part_id` (`part_id`),
+  KEY `bin_id` (`bin_id`),
+  KEY `project_id` (`project_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `stock_movements_part_fk` FOREIGN KEY (`part_id`) REFERENCES `parts` (`id`) ON DELETE RESTRICT,
+  CONSTRAINT `stock_movements_bin_fk` FOREIGN KEY (`bin_id`) REFERENCES `bins` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `stock_movements_project_fk` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `stock_movements_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `stock_movements_quantity_chk` CHECK (`quantity` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
+
+
+-- ---------------------------------------------------------------------
+--  6. ELLENŐRZÉS  (az importálás végén kiírja, mi lett az eredmény)
 -- ---------------------------------------------------------------------
 SELECT 'users'           AS tabla, COUNT(*) AS sorok FROM `users`
 UNION ALL SELECT 'parts',           COUNT(*) FROM `parts`
@@ -174,6 +270,7 @@ UNION ALL SELECT 'bins',            COUNT(*) FROM `bins`
 UNION ALL SELECT 'üres rekeszek',   COUNT(*) FROM `bins` WHERE `part_id` IS NULL OR `quantity` = 0
 UNION ALL SELECT 'projects',        COUNT(*) FROM `projects`
 UNION ALL SELECT 'project_parts',   COUNT(*) FROM `project_parts`
-UNION ALL SELECT 'project_history', COUNT(*) FROM `project_history`;
+UNION ALL SELECT 'project_history', COUNT(*) FROM `project_history`
+UNION ALL SELECT 'stock_movements', COUNT(*) FROM `stock_movements`;
 
 SELECT `username`, `role` FROM `users` ORDER BY `id`;

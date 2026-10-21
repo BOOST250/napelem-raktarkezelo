@@ -21,16 +21,18 @@ class Auth
 
     /**
      * CORS fejlécek a cookie-s (credentials) kérésekhez.
-     * Credentials mellett a "*" origin nem engedett, ezért a kérő origint küldjük vissza.
+     * Csak http(s) origint tükrözünk (localhost vagy IP-cím). Más sémát nem engedünk.
      */
     public static function cors(string $methods = 'GET, POST, OPTIONS'): void
     {
         header('Content-Type: application/json; charset=utf-8');
         $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-        if ($origin !== '') {
+        if (preg_match('~^https?://([A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\])(:\d+)?$~', $origin) === 1) {
             header('Access-Control-Allow-Origin: ' . $origin);
             header('Access-Control-Allow-Credentials: true');
             header('Vary: Origin');
+        } else {
+            header('Access-Control-Allow-Origin: *');
         }
         header('Access-Control-Allow-Methods: ' . $methods);
         header('Access-Control-Allow-Headers: Content-Type');
@@ -53,12 +55,14 @@ class Auth
         if (session_status() === PHP_SESSION_ACTIVE) {
             return;
         }
-        session_name('NAPELEMSESSID');
+        // Nincs külön sessionnév és nincs Domain: a süti a megnyitott
+        // hoszthoz kötődik (localhost vagy a gép IP-címe), neve PHPSESSID.
         session_set_cookie_params([
-            'lifetime' => 0,          // böngésző bezárásáig
+            'lifetime' => 0,
             'path' => '/',
-            'httponly' => true,       // JavaScriptből nem olvasható
+            'httponly' => true,
             'samesite' => 'Lax',
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
         ]);
         session_start();
     }

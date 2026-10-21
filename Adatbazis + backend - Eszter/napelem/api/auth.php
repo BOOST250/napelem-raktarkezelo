@@ -1,19 +1,20 @@
 <?php
 /* =====================================================================
-   Bejelentkezés-kezelés (PHP session).
-   Használat: require_once __DIR__ . '/auth.php';  (a cors.php UTÁN)
+   Régi belépés-segéd. Az új kéréseket a Slim SessionMiddleware és
+   RoleMiddleware kezeli; ez a fájl csak a még közvetlenül behúzott
+   kód miatt maradt.
 
-   A session-cookie a localhost összes portján ugyanaz (a same-site
-   szabály a portot nem veszi figyelembe), ezért a 8123-as porton futó
-   frontend is kap sütit – de csak akkor, ha a kérés credentials-szel
-   megy, és a válaszban ott van az Access-Control-Allow-Credentials
-   (lásd cors.php).
+   A süti domainje szándékosan nincs beállítva: ahhoz a hoszthoz kötődik,
+   ahonnan az oldalt megnyitották (localhost vagy a gép IP-címe).
    ===================================================================== */
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
         'httponly' => true,
         'samesite' => 'Lax',
+        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
     ]);
     session_start();
 }
