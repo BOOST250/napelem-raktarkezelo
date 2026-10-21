@@ -87,30 +87,17 @@ document.addEventListener(
                 // ELLENŐRZÉS
                 // =================================
 
-                if (
-                    !location ||
-                    !customerName ||
-                    !customerEmail ||
-                    !customerPhone
-                ) {
+                const ellenorzes = projektAdatHiba({
+                    location: location,
+                    description: description,
+                    customer_name: customerName,
+                    customer_email: customerEmail,
+                    customer_phone: customerPhone
+                });
 
-                    showError(
-                        "Kérjük, töltsd ki az összes kötelező mezőt!"
-                    );
+                if (ellenorzes) {
 
-                    return;
-                }
-
-
-                // =================================
-                // E-MAIL ELLENŐRZÉS
-                // =================================
-
-                if (!isValidEmail(customerEmail)) {
-
-                    showError(
-                        "Kérjük, adj meg egy érvényes e-mail címet!"
-                    );
+                    showError(ellenorzes);
 
                     return;
                 }
@@ -139,8 +126,8 @@ document.addEventListener(
                         location: location,
                         description: description,
                         customer_name: customerName,
-                        customer_email: customerEmail,
-                        customer_phone: customerPhone
+                        customer_email: customerEmail || null,
+                        customer_phone: customerPhone || null
                     });
 
                 } catch (error) {
@@ -213,17 +200,6 @@ document.addEventListener(
 
         }
 
-
-        // =================================
-        // E-MAIL ELLENŐRZÉS
-        // =================================
-
-        function isValidEmail(email) {
-
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                .test(email);
-
-        }
 
     }
 );

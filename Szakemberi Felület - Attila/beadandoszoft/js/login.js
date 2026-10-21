@@ -13,6 +13,12 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // Éles módban a közös belépő dönti el a szerepkör alapján, hová megy a felhasználó.
+  if (!CONFIG.USE_MOCK) {
+    location.replace(CONFIG.BELEPES + location.hash);
+    return;
+  }
+
   const urlap = document.getElementById('login-form');
   const nevMezo = document.getElementById('username');
   const jelszoMezo = document.getElementById('password');
@@ -48,6 +54,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if (kijelentkezett) {
     info('Sikeresen kijelentkeztél.');
     history.replaceState(null, '', location.pathname);
+  }
+
+  const demoHint = document.getElementById('demo-hint');
+  if (demoHint) {
+    demoHint.hidden = false;
+    demoHint.addEventListener('click', event => {
+      const gombFelhasznalo = event.target.closest('button[data-user]');
+      if (!gombFelhasznalo) return;
+      nevMezo.value = gombFelhasznalo.dataset.user;
+      jelszoMezo.value = gombFelhasznalo.dataset.pass;
+      gomb.focus();
+    });
   }
 
   // ---- Már be van jelentkezve? Akkor tovább a kezdőlapra ----

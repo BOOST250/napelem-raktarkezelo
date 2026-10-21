@@ -90,19 +90,6 @@
 
         <div class="sidebar-bottom">
 
-            <a href="#" class="nav-item">
-
-                <span class="nav-icon">
-                    ⚙
-                </span>
-
-                <span>
-                    Beállítások
-                </span>
-
-            </a>
-
-
             <button
                 id="logoutButton"
                 class="nav-item logout-button">
@@ -185,7 +172,7 @@
             <div id="pageMessage" class="form-message"></div>
 
 
-            <div id="pageContent" style="display: none;">
+            <div id="pageContent" hidden>
 
 
                 <!-- OLDAL FEJLÉCE -->
@@ -220,16 +207,22 @@
 
                 <div class="projects-card">
 
-                    <div class="table-header">
+                    <div class="table-header table-header-row">
 
                         <h3>
                             Projekt adatai
                         </h3>
 
+                        <button type="button" id="editProjectButton" class="secondary-button">
+                            Szerkesztés
+                        </button>
+
                     </div>
 
+                    <div id="detailsMessage" class="form-message"></div>
 
-                    <div class="status-list">
+
+                    <div class="status-list" id="detailsView">
 
                         <div class="status-row">
                             <span>Ügyfél</span>
@@ -262,6 +255,43 @@
                         </div>
 
                     </div>
+
+                    <form id="editProjectForm" class="form-section" hidden>
+
+                        <div class="form-group">
+                            <label for="editLocation">Helyszín <span class="required">*</span></label>
+                            <input type="text" id="editLocation" maxlength="255" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editDescription">Leírás</label>
+                            <textarea id="editDescription" rows="4" maxlength="5000"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editCustomerName">Ügyfél neve <span class="required">*</span></label>
+                            <input type="text" id="editCustomerName" maxlength="100" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editEmail">E-mail cím</label>
+                                <input type="email" id="editEmail" maxlength="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="editPhone">Telefonszám</label>
+                                <input type="tel" id="editPhone" maxlength="20" placeholder="+36 30 123 4567">
+                            </div>
+                        </div>
+
+                        <div id="editMessage" class="form-message"></div>
+
+                        <div class="form-actions">
+                            <button type="button" id="cancelEditButton" class="secondary-button">Mégse</button>
+                            <button type="submit" id="saveProjectButton" class="primary-button">Mentés</button>
+                        </div>
+
+                    </form>
 
                 </div>
 
@@ -380,90 +410,121 @@
                 </div>
 
 
-                <!-- =============================
-                     ÁLLAPOTKEZELÉS
-                ============================== -->
+                <!-- Munkaóra és munkadíj (A.5) -->
 
                 <div class="projects-card">
 
                     <div class="table-header">
 
-                        <h3>
-                            Állapot
-                        </h3>
+                        <h3>Becsült munka</h3>
 
-                        <p id="statusHint">
-                            —
-                        </p>
+                        <p>A felmérés során rögzített munkaóra és munkadíj. Az árkalkuláció mindkettőt használja.</p>
 
                     </div>
 
-
                     <div class="form-section">
-
-                        <!-- A lehetséges lépéseket a project.js teszi be,
-                             mert az a projekt mostani állapotától függ -->
-
-                        <div class="form-actions" id="statusActions">
-                        </div>
-
-
-                        <!-- Munkaóra és munkadíj: a szakember a munka
-                             végén rögzíti (work_hours, labor_cost) -->
 
                         <div class="form-row">
 
                             <div class="form-group">
 
-                                <label for="workHours">
-                                    Munkaóra
-                                </label>
+                                <label for="workHours">Munkaóra</label>
 
-                                <input
-                                    type="number"
-                                    id="workHours"
-                                    min="0"
-                                    step="0.5"
-                                    placeholder="pl. 16">
+                                <input type="number" id="workHours" min="0.01" max="999.99" step="0.5" placeholder="pl. 8,5">
 
                             </div>
 
-
                             <div class="form-group">
 
-                                <label for="laborCost">
-                                    Munkadíj (Ft)
-                                </label>
+                                <label for="laborCost">Munkadíj (Ft)</label>
 
-                                <input
-                                    type="number"
-                                    id="laborCost"
-                                    min="0"
-                                    step="1000"
-                                    placeholder="pl. 240000">
+                                <input type="number" id="laborCost" min="0" step="1000" placeholder="pl. 85000">
 
                             </div>
 
                         </div>
 
-
                         <div class="form-actions">
 
-                            <button
-                                type="button"
-                                id="saveWorkButton"
-                                class="secondary-button">
-
+                            <button type="button" id="saveWorkButton" class="secondary-button">
                                 Munkaadatok mentése
-
                             </button>
 
                         </div>
 
-
-                        <div id="statusMessage" class="form-message"></div>
+                        <div id="workMessage" class="form-message"></div>
 
                     </div>
+
+                </div>
+
+
+                <!-- Árkalkuláció (A.6) -->
+
+                <div class="projects-card">
+
+                    <div class="table-header">
+
+                        <h3>Árkalkuláció</h3>
+
+                        <p>Végleges csak akkor, ha minden alkatrész le van foglalva és a munkadíj megvan.</p>
+
+                    </div>
+
+                    <div class="status-list">
+
+                        <div class="status-row">
+                            <span>Anyagköltség (katalógusár)</span>
+                            <strong id="costMaterial">—</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>Becsült munkaóra</span>
+                            <strong id="costHours">—</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>Munkadíj</span>
+                            <strong id="costLabor">—</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <span>Összesen</span>
+                            <strong id="costTotal">—</strong>
+                        </div>
+
+                    </div>
+
+                    <p id="costMissing" class="cost-note"></p>
+
+                    <div class="form-actions">
+
+                        <button type="button" id="quoteButton" class="primary-button">
+                            Árkalkuláció elkészítése
+                        </button>
+
+                    </div>
+
+                    <div id="quoteMessage" class="form-message"></div>
+
+                </div>
+
+
+                <!-- Lezárás (A.7) -->
+
+                <div class="projects-card">
+
+                    <div class="table-header">
+
+                        <h3>Állapot</h3>
+
+                        <p id="statusHint">—</p>
+
+                    </div>
+
+                    <div class="form-actions" id="statusActions"></div>
+
+                    <div id="statusMessage" class="form-message"></div>
 
                 </div>
 
@@ -520,6 +581,8 @@
 
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
+<script src="../js/mock.js"></script>
+<script src="../js/validate.js"></script>
 <script src="../js/app.js"></script>
 <script src="../js/project.js"></script>
 

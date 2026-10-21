@@ -1,27 +1,20 @@
 /* ================= API réteg =================
-   Minden szerverhívás ezen a fájlon megy át (fetch). Eszter végpontjai:
-   projects.php, project_parts.php, parts.php, bins.php, project_history.php,
-   login.php, me.php, logout.php.
+   Minden szerverhívás ezen a fájlon megy át (fetch).
 
-   Szerencsés helyzet: Attila felülete eleve Eszter mezőneveit használja
-   (customer_name, location, status, work_hours, labor_cost, created_at),
-   ezért itt NINCS angol↔magyar leképezés – csak a PHP-tól stringként
-   visszakapott számokat alakítjuk számmá.
+   Eszter végpontjai: projects.php, project_parts.php, parts.php, bins.php,
+   project_history.php, login.php, me.php, logout.php.
 
-   Három dolgot viszont kliensoldalon kell megoldani, mert a backend nem
-   tudja:
+   A szakemberi állapotgéphez külön, objektumorientált végpontok kellenek,
+   mert a foglalás és az árkalkuláció egy tranzakcióban több táblát ír
+   (a projects.php és a project_parts.php változatlan maradt):
+   project_assign.php, project_quote.php, project_close.php, project_contact.php.
 
-   1) Nincs egyrekordos GET. A projects.php és a project_parts.php mindig a
-      teljes táblát adja vissza, ?id= nélkül. A részletező oldal ezért
-      lekéri a listát és abból szűr (projekt(), projektAlkatreszek()).
+   A mezőnevek Eszter sémáját követik. A mysqli a számokat stringként adja,
+   azokat itt alakítjuk számmá.
 
-   2) Nincs összesítés. Egy alkatrész készlete a bins tábla soraiból,
-      lefoglaltsága a project_parts soraiból adódik össze (alkatreszek()).
-
-   3) A project_parts.php POST-ja nem ellenőriz duplikátumot, a
-      (project_id, part_id) viszont összetett elsődleges kulcs – ismételt
-      POST HTTP 500-at ad "Duplicate entry" hibával. Ezt itt fogjuk el, és
-      érthető magyar üzenetet adunk helyette. */
+   Nincs egyrekordos GET, és a készletet a bins + project_parts sorokból
+   a kliens összesíti – ugyanazzal a szabadságképlettel, mint a bevételezés:
+   szabad = készlet − aktív projektek reserved=1 mennyisége. */
 
 class ApiError extends Error {
   constructor(message, status) {
@@ -33,11 +26,20 @@ class ApiError extends Error {
 const Api = (() => {
   /* ---------------- Közös HTTP-réteg ---------------- */
 
-  // A közös belépő a napelem mappában van (../belepes/), az oldalak viszont
-  // a pages/ alatt futnak – onnan egy szinttel több ".." kell.
-  function bejelentkezesre() {
-    const ut = location.pathname.includes('/pages/') ? '../../belepes/' : '../belepes/';
-    location.replace(ut);
+  /* Éles módban a közös belépő a CONFIG.BELEPES útvonal (host nélkül).
+     Demo módban a saját login.html, mert a közös oldal a PHP API-t hívja.
+     Az aloldalak a pages/ alatt vannak, onnan egy szinttel több ".." kell. */
+  function belepesUt(hash) {
+    hash = hash || '';
+    if (CONFIG.USE_MOCK) {
+      const gyoker = location.pathname.includes('/pages/') ? '../' : '';
+      return gyoker + 'login.html?mock=1' + hash;
+    }
+    return CONFIG.BELEPES + hash;
+  }
+
+  function bejelentkezesre(hash) {
+    location.replace(belepesUt(hash));
   }
 
   async function kuld(method, url, body) {
@@ -87,6 +89,7 @@ const Api = (() => {
   // Adatvégpont hívása. 401-nél (lejárt session) vissza a belépő oldalra.
   async function hiv(method, fajl, body) {
     try {
+      if (CONFIG.USE_MOCK) return MockBackend.keres(method, fajl, body);
       return await kuld(method, CONFIG.API_BASE + fajl, body);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) bejelentkezesre();
@@ -164,8 +167,8 @@ const Api = (() => {
       location: adat.location,
       description: adat.description ?? '',
       customer_name: adat.customer_name,
-      customer_email: adat.customer_email ?? '',
-      customer_phone: adat.customer_phone ?? '',
+      customer_email: adat.customer_email || null,
+      customer_phone: adat.customer_phone || null,
     });
     return szam(valasz?.id);
   }
@@ -179,7 +182,9 @@ const Api = (() => {
   async function projektTortenet(id) {
     const keresett = Number(id);
     const sorok = lista(alakit.tortenet)(await hiv('GET', '/project_history.php'));
-    return sorok.filter(h => h.project_id === keresett);
+    return sorok
+      .filter(h => h.project_id === keresett)
+      .sort((a, b) => String(a.changed_at).localeCompare(String(b.changed_at)) || a.id - b.id);
   }
 
   /* ---------------- Alkatrészek és készlet ----------------
@@ -248,22 +253,19 @@ const Api = (() => {
     return sorok.filter(t => t.project_id === keresett);
   }
 
-  async function ujProjektAlkatresz(projektId, alkatreszId, darab) {
-    // A POST-nak nincs duplikátum-ellenőrzése, az összetett kulcs miatt viszont
-    // az ismételt beszúrás 500-ba fut. Előbb megnézzük, van-e már ilyen sor.
-    const meglevo = (await projektAlkatreszek(projektId)).find(t => t.part_id === Number(alkatreszId));
-    if (meglevo) {
-      throw new ApiError(
-        'Ez az alkatrész már szerepel a projekt listáján – a mennyiséget a táblázatban módosítsd.',
-        409
-      );
-    }
-    return hiv('POST', '/project_parts.php', {
+  // A.4 – foglalás vagy előfoglalás egy tranzakcióban (project_assign.php).
+  const hozzarendel = (projektId, alkatreszId, darab) =>
+    hiv('POST', '/project_assign.php', {
       project_id: Number(projektId),
       part_id: Number(alkatreszId),
       quantity: Number(darab),
     });
-  }
+
+  // A régi név a hozzárendelésre mutat, hogy ne lehessen a foglalás nélküli
+  // project_parts.php POST-on keresztül igényt felvenni.
+  const ujProjektAlkatresz = hozzarendel;
+
+  const mindenTetel = () => hiv('GET', '/project_parts.php').then(lista(alakit.tetel));
 
   const tetelKulcs = (projektId, alkatreszId) =>
     `?project_id=${encodeURIComponent(projektId)}&part_id=${encodeURIComponent(alkatreszId)}`;
@@ -276,13 +278,32 @@ const Api = (() => {
 
   /* ---------------- Bejelentkezés ---------------- */
 
-  const auth = (method, nev, body) => kuld(method, `${CONFIG.AUTH_BASE}/${nev}.php`, body);
+  // A mock válasza szinkron. Promise-ba csomagoljuk, hogy a .then és a
+  // dobott ApiError ugyanúgy viselkedjen, mint a fetch-es ág.
+  const auth = (method, nev, body) => {
+    if (CONFIG.USE_MOCK) {
+      return Promise.resolve().then(() => MockBackend.keres(method, `/auth/${nev}`, body));
+    }
+    return kuld(method, `${CONFIG.AUTH_BASE}/${nev}.php`, body);
+  };
+
+  const arkalkulacio = id => hiv('POST', '/project_quote.php', { project_id: Number(id) });
+
+  const lezaras = (id, status) =>
+    hiv('POST', '/project_close.php', { project_id: Number(id), status });
+
+  const modositElerhetoseg = (id, adat) =>
+    hiv('PUT', `/project_contact.php?id=${encodeURIComponent(id)}`, {
+      customer_email: adat.customer_email ?? null,
+      customer_phone: adat.customer_phone ?? null,
+    });
 
   return {
     login: (username, password) =>
       auth('POST', 'login', { username, password }).then(d => alakit.felhasznalo(d?.user)),
     me: () => auth('GET', 'me').then(d => alakit.felhasznalo(d?.user)),
     logout: () => auth('POST', 'logout'),
+    belepesUt,
     bejelentkezesre,
 
     projektek,
@@ -294,9 +315,14 @@ const Api = (() => {
 
     alkatreszek,
 
+    mindenTetel,
     projektAlkatreszek,
+    hozzarendel,
     ujProjektAlkatresz,
     modositProjektAlkatresz,
     torolProjektAlkatresz,
+    arkalkulacio,
+    lezaras,
+    modositElerhetoseg,
   };
 })();

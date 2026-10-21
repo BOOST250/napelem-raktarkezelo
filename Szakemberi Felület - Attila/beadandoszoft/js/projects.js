@@ -1,297 +1,112 @@
-// =====================================
-// PROJEKTEK – ADATBÁZISBÓL
-// =====================================
-//
-// A beégetett tesztadatok helyére az Api réteg lépett: a lista Eszter
-// projects.php végpontjáról jön. A megjelenítést végző függvények
-// (displayProjects, filterProjects, formatDate) nem változtak, csak az
-// adat forrása.
+/* Projektek listája (A.2). Az adat a projects.php végpontból jön,
+   a költség oszlop a tételek és a munkadíj összesítése. */
 
 let projects = [];
+let tetelek = [];
 
+function esc(szoveg) {
+    return String(szoveg ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
 
-// =====================================
-// STÁTUSZ NEVEK ÉS CSS OSZTÁLYOK
-// =====================================
-//
-// A config.js-ben vannak, hogy a többi oldal is ugyanazt használja.
+function formatFt(szam) {
+    return Number(szam).toLocaleString('hu-HU') + ' Ft';
+}
 
-const statusNames = STATUSZ_NEV;
-const statusClasses = STATUSZ_OSZTALY;
+function formatDate(dateString) {
+    if (!dateString) return '–';
+    const date = new Date(String(dateString).replace(' ', 'T'));
+    if (Number.isNaN(date.getTime())) return '–';
+    return date.toLocaleDateString('hu-HU', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+}
 
-
-// =====================================
-// PROJEKTEK MEGJELENÍTÉSE
-// =====================================
+function projektAr(project) {
+    const sorok = tetelek.filter(t => t.project_id === project.id);
+    if (sorok.length === 0) return '–';
+    const mindFoglalt = sorok.every(t => t.reserved);
+    const anyag = sorok.reduce((s, t) => s + t.part_price * t.quantity, 0);
+    const vegleges = mindFoglalt
+        && project.labor_cost !== null
+        && ['Scheduled', 'InProgress', 'Completed', 'Failed'].includes(project.status);
+    if (vegleges) return formatFt(anyag + project.labor_cost);
+    if (!mindFoglalt) return 'hiányos';
+    return 'nincs véglegesítve';
+}
 
 function displayProjects(projectList) {
-
-    const tableBody =
-        document.getElementById("projectsTableBody");
-
-
-    // Táblázat kiürítése
-
-    tableBody.innerHTML = "";
-
-
-    // Projekt darabszám
-
-    document.getElementById("projectCount").textContent =
-        `${projectList.length} projekt`;
-
-
-    // Nincs találat
+    const tableBody = document.getElementById('projectsTableBody');
+    document.getElementById('projectCount').textContent = projectList.length + ' projekt';
+    tableBody.innerHTML = '';
 
     if (projectList.length === 0) {
-
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6">
-                    <div class="empty-projects">
-                        Nincs a keresésnek megfelelő projekt.
-                    </div>
-                </td>
-            </tr>
-        `;
-
+        const uzenet = projects.length === 0
+            ? 'Még nincs projekt. Hozz létre egy újat.'
+            : 'Nincs a keresésnek megfelelő projekt.';
+        tableBody.innerHTML =
+            '<tr><td colspan="7"><div class="empty-projects">' + esc(uzenet) + '</div></td></tr>';
         return;
     }
 
-
-    // Projektek végigjárása
-
     projectList.forEach(project => {
-
-        const row = document.createElement("tr");
-
-
-        row.innerHTML = `
-
-            <td>
-                #${project.id}
-            </td>
-
-
-            <td>
-
-                <div class="customer-name">
-                    ${project.customer_name}
-                </div>
-
-                <div class="customer-contact">
-                    ${project.customer_email}
-                </div>
-
-            </td>
-
-
-            <td>
-                ${project.location}
-            </td>
-
-
-            <td>
-
-                <span
-                    class="project-status ${statusClasses[project.status]}">
-
-                    ${statusNames[project.status]}
-
-                </span>
-
-            </td>
-
-
-            <td>
-                ${formatDate(project.created_at)}
-            </td>
-
-
-            <td>
-
-                <a
-                    href="project.html?id=${project.id}"
-                    class="open-project">
-
-                    Megnyitás
-
-                </a>
-
-            </td>
-
-        `;
-
-
+        const elerhetoseg = [project.customer_email, project.customer_phone].filter(Boolean).join(' · ');
+        const row = document.createElement('tr');
+        row.innerHTML =
+            '<td>#' + esc(project.id) + '</td>' +
+            '<td><div class="customer-name">' + esc(project.customer_name) + '</div>' +
+            '<div class="customer-contact">' + esc(elerhetoseg || '–') + '</div></td>' +
+            '<td>' + esc(project.location) + '</td>' +
+            '<td><span class="project-status ' + esc(STATUSZ_OSZTALY[project.status] || '') + '">' +
+            esc(STATUSZ_NEV[project.status] || project.status) + '</span></td>' +
+            '<td>' + esc(projektAr(project)) + '</td>' +
+            '<td>' + esc(formatDate(project.created_at)) + '</td>' +
+            '<td><a href="project.html?id=' + encodeURIComponent(project.id) + '" class="open-project">Megnyitás</a></td>';
         tableBody.appendChild(row);
-
     });
-
 }
-
-
-// =====================================
-// DÁTUM FORMÁZÁSA
-// =====================================
-
-function formatDate(dateString) {
-
-    const date = new Date(dateString);
-
-
-    return date.toLocaleDateString(
-        "hu-HU",
-        {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit"
-        }
-    );
-
-}
-
-
-// =====================================
-// KERESÉS ÉS SZŰRÉS
-// =====================================
 
 function filterProjects() {
+    const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+    const selectedStatus = document.getElementById('statusFilter').value;
 
-    const searchInput =
-        document.getElementById("searchInput");
-
-
-    const statusFilter =
-        document.getElementById("statusFilter");
-
-
-    const searchText =
-        searchInput.value.toLowerCase().trim();
-
-
-    const selectedStatus =
-        statusFilter.value;
-
-
-    const filteredProjects =
-        projects.filter(project => {
-
-
-            // Keresés ügyfél vagy helyszín alapján
-
-            const matchesSearch =
-
-                project.customer_name
-                    .toLowerCase()
-                    .includes(searchText)
-
-                ||
-
-                project.location
-                    .toLowerCase()
-                    .includes(searchText);
-
-
-            // Státusz szűrés
-
-            const matchesStatus =
-
-                selectedStatus === "all"
-
-                ||
-
-                project.status === selectedStatus;
-
-
-            return matchesSearch && matchesStatus;
-
-        });
-
-
-    displayProjects(filteredProjects);
-
+    displayProjects(projects.filter(project => {
+        const matchesSearch =
+            project.customer_name.toLowerCase().includes(searchText) ||
+            project.location.toLowerCase().includes(searchText) ||
+            project.customer_email.toLowerCase().includes(searchText) ||
+            project.customer_phone.toLowerCase().includes(searchText);
+        const matchesStatus = selectedStatus === 'all' || project.status === selectedStatus;
+        return matchesSearch && matchesStatus;
+    }));
 }
 
-
-// =====================================
-// BETÖLTÉS AZ ADATBÁZISBÓL
-// =====================================
-
-// Hibajelzés a táblázat helyén (a .empty-projects stílust használja).
 function showLoadError(message) {
-
-    document.getElementById("projectCount").textContent = "–";
-
-    document.getElementById("projectsTableBody").innerHTML = `
-        <tr>
-            <td colspan="6">
-                <div class="empty-projects">
-                    ${message}
-                </div>
-            </td>
-        </tr>
-    `;
+    document.getElementById('projectCount').textContent = '–';
+    document.getElementById('projectsTableBody').innerHTML =
+        '<tr><td colspan="7"><div class="empty-projects">' + esc(message) + '</div></td></tr>';
 }
-
 
 async function loadProjects() {
-
-    document.getElementById("projectsTableBody").innerHTML = `
-        <tr>
-            <td colspan="6">
-                <div class="empty-projects">
-                    Projektek betöltése…
-                </div>
-            </td>
-        </tr>
-    `;
-
+    document.getElementById('projectsTableBody').innerHTML =
+        '<tr><td colspan="7"><div class="empty-projects">Projektek betöltése…</div></td></tr>';
     try {
-
-        projects = await Api.projektek();
-
+        const [lista, sorok] = await Promise.all([Api.projektek(), Api.mindenTetel()]);
+        projects = lista;
+        tetelek = sorok;
         filterProjects();
-
     } catch (error) {
-
         showLoadError(error.message);
-
     }
 }
 
-
-// =====================================
-// OLDAL BETÖLTÉSE
-// =====================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-
-        // Projektek betöltése és megjelenítése
-
-        loadProjects();
-
-
-        // Keresés
-
-        document
-            .getElementById("searchInput")
-            .addEventListener(
-                "input",
-                filterProjects
-            );
-
-
-        // Státusz szűrés
-
-        document
-            .getElementById("statusFilter")
-            .addEventListener(
-                "change",
-                filterProjects
-            );
-
-    }
-);
+document.addEventListener('DOMContentLoaded', () => {
+    loadProjects();
+    document.getElementById('searchInput').addEventListener('input', filterProjects);
+    document.getElementById('statusFilter').addEventListener('change', filterProjects);
+});

@@ -26,8 +26,10 @@ PHP + MySQL backend, sima HTML/CSS/JavaScript felületek, keretrendszer nélkül
    ├── raktarvezeto/               ← Raktárvezetői felület - Én/raktarvezeto
    └── raktaros/                   ← Raktárosi Felület -Ivett
    ```
-4. Nyisd meg: <http://localhost/napelem/belepes/>
+4. Nyisd meg: `http://<szerver>/napelem/belepes/` – a `<szerver>` a gép saját címe (`localhost` vagy a LAN-IP). A felületek host nélküli útvonalat használnak (`/napelem/api`), ezért másik gépről is ugyanez a lap nyílik.
 
 A felhasználókat az adminisztrátor veszi fel (`users` tábla); regisztráció nincs. A jelszavakat a backend hash-elve tárolja.
 
 A raktárvezetői felület backend nélkül, demo módban is kipróbálható – lásd [a felület README-jét](<Raktárvezetői felület - Én/raktarvezeto/README.md>).
+
+A szakemberi felület leírása és a demo mód (`?mock=1`): [Szakemberi felület README](<Szakemberi Felület - Attila/beadandoszoft/README.md>).

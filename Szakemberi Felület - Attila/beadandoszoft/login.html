@@ -35,6 +35,13 @@
             Jelentkezz be a projektek kezeléséhez.
         </p>
 
+        <div id="demo-hint" class="demo-hint" hidden>
+            <p>Demo felhasználók – kattintásra kitöltődik az űrlap:</p>
+            <button type="button" data-user="szakember" data-pass="szakember123">szakember / szakember123</button>
+            <button type="button" data-user="raktarvezeto" data-pass="raktar123">raktárvezető (nem léphet be)</button>
+            <button type="button" data-user="raktaros" data-pass="raktaros123">raktáros (nem léphet be)</button>
+        </div>
+
         <!-- Kijelentkezés utáni visszajelzés, a login.js mutatja meg -->
         <div id="login-info" class="login-message info login-hidden"></div>
 
@@ -72,6 +79,7 @@
     <!-- JavaScript -->
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/mock.js"></script>
     <script src="js/login.js"></script>
 
 </body>
