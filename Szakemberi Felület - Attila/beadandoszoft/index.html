@@ -54,11 +54,6 @@
             <!-- Oldalsáv alsó része -->
             <div class="sidebar-bottom">
 
-                <a href="#" class="nav-item">
-                    <span class="nav-icon">⚙</span>
-                    <span>Beállítások</span>
-                </a>
-
                 <button id="logoutButton" class="nav-item logout-button">
                     <span class="nav-icon">↪</span>
                     <span>Kijelentkezés</span>
@@ -111,7 +106,7 @@
                             NAPELEMPROJEKT-KEZELÉS
                         </span>
 
-                        <h2>Üdvözöllek!</h2>
+                        <h2 id="welcomeHeading">Üdvözöllek!</h2>
 
                         <p>
                             Innen kezelheted a projekteket, az alkatrészeket
@@ -145,7 +140,7 @@
                             </span>
 
                             <strong id="totalProjects">
-                                12
+                                –
                             </strong>
                         </div>
 
@@ -164,7 +159,7 @@
                             </span>
 
                             <strong id="activeProjects">
-                                4
+                                –
                             </strong>
                         </div>
 
@@ -183,7 +178,7 @@
                             </span>
 
                             <strong id="completedProjects">
-                                7
+                                –
                             </strong>
                         </div>
 
@@ -202,7 +197,7 @@
                             </span>
 
                             <strong id="failedProjects">
-                                1
+                                –
                             </strong>
                         </div>
 
@@ -295,61 +290,24 @@
                         </div>
 
 
-                        <div class="status-list">
-
-                            <div class="status-row">
-                                <span>
-                                    <span class="status-dot new"></span>
-                                    Új
-                                </span>
-
-                                <strong>2</strong>
-                            </div>
-
-
-                            <div class="status-row">
-                                <span>
-                                    <span class="status-dot draft"></span>
-                                    Tervezet
-                                </span>
-
-                                <strong>2</strong>
-                            </div>
-
-
-                            <div class="status-row">
-                                <span>
-                                    <span class="status-dot scheduled"></span>
-                                    Ütemezett
-                                </span>
-
-                                <strong>3</strong>
-                            </div>
-
-
-                            <div class="status-row">
-                                <span>
-                                    <span class="status-dot progress"></span>
-                                    Folyamatban
-                                </span>
-
-                                <strong>4</strong>
-                            </div>
-
-
-                            <div class="status-row">
-                                <span>
-                                    <span class="status-dot completed"></span>
-                                    Befejezett
-                                </span>
-
-                                <strong>7</strong>
-                            </div>
-
+                        <div class="status-list" id="statusList">
+                            <p class="dashboard-empty">Betöltés…</p>
                         </div>
 
                     </div>
 
+                </div>
+
+                <p id="dashboardMessage" class="dashboard-message" hidden></p>
+
+                <div class="content-card dashboard-recent">
+                    <div class="card-header">
+                        <h3>Legutóbbi projektek</h3>
+                        <p>A lista a rendszerben lévő projekteket és az állapotukat mutatja</p>
+                    </div>
+                    <div id="recentProjects" class="recent-list">
+                        <p class="dashboard-empty">Betöltés…</p>
+                    </div>
                 </div>
 
             </section>
@@ -362,7 +320,9 @@
     <!-- JavaScript -->
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/mock.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
 
 </body>
 </html>

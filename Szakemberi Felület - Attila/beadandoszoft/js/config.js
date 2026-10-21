@@ -1,30 +1,67 @@
 /* ================= Beállítások =================
-   Szakemberi felület – Eszter PHP backendjének elérése.
+   Szakemberi felület. Élesben Eszter PHP API-ját hívja, a közös belépő
+   (Közös/belepes) a specialist szerepkört ide irányítja.
 
-   Ez a felület NINCS demo módban: közvetlenül az adatbázisból dolgozik.
-   Ennek oka, hogy a szakemberi és a raktárvezetői felület CSAK a közös
-   adatbázison keresztül tud összekapcsolódni. Egy localStorage-alapú demo
-   mód minden felületnek külön tárolót adna, így a szakember által rögzített
-   alkatrészigény soha nem jelenne meg a raktárvezetőnél. */
+   A címek egy helyen vannak, és nincs bennük gépnév. A gyökér a lap
+   saját címéből jön (pl. http://192.168.0.10/napelem/szakember/ → /napelem),
+   ezért a felület localhostól és a LAN másik gépéről is ugyanúgy működik.
+   A login.php, a me.php és a logout.php az api mappában van; az auth/
+   mappa csak a PHP osztály, nincs külön HTTP-végpontja.
+
+   Demo mód backend nélkül: bármelyik oldal címéhez ?mock=1
+   (vissza élesre: ?mock=0). A választás a böngészőlaphoz tartozik,
+   így az aloldalak is demóban maradnak. */
+
+const NAPELEM_GYOKER = (() => {
+  const ut = window.location.pathname;
+  const jel = '/napelem/';
+  const hely = ut.indexOf(jel);
+  return hely === -1 ? '/napelem' : ut.slice(0, hely) + '/napelem';
+})();
 
 const CONFIG = {
-  // Eszter api mappája a XAMPP htdocs alatt.
-  API_BASE: '/napelem/api',
-  AUTH_BASE: '/napelem/api',
+  GYOKER: NAPELEM_GYOKER,
+  API_BASE: NAPELEM_GYOKER + '/api',
+  AUTH_BASE: NAPELEM_GYOKER + '/api',
+  BELEPES: NAPELEM_GYOKER + '/belepes/',
 
   // Ehhez a felülethez szakemberi jogosultság kell (users.role).
   ENGEDETT_SZEREPKOR: 'specialist',
+
+  // false = a valódi PHP API. A demo a ?mock=1 címmel kapcsolható be.
+  USE_MOCK: false,
 };
 
-// A users.role értékek magyar megnevezése (app.js és login.js használja).
+(function () {
+  const KULCS = 'szakember_mock';
+  let mock = null;
+  try {
+    mock = new URLSearchParams(location.search).get('mock');
+  } catch (e) {
+    mock = null;
+  }
+  try {
+    if (mock === '0') sessionStorage.removeItem(KULCS);
+    else if (mock === '1') sessionStorage.setItem(KULCS, '1');
+    if (mock !== '0' && sessionStorage.getItem(KULCS) === '1') CONFIG.USE_MOCK = true;
+  } catch (e) {
+    /* sessionStorage nem elérhető – marad az éles mód */
+  }
+})();
+
+// A users.role értékek magyar megnevezése.
 const SZEREPKOR_NEV = {
   specialist: 'Szakember',
   warehouse_manager: 'Raktárvezető',
   warehouse_worker: 'Raktáros',
+  admin: 'Adminisztrátor',
 };
 
-/* A projects.status hét lehetséges értéke magyarul és CSS-osztállyal.
-   Eddig ez a projects.js-ben volt beégetve; innen minden oldal eléri. */
+/* A feladatkiírás hét állapota. A szakember viszi Új → Tervezet →
+   Várakozik vagy Ütemezett, és a végén Befejezett vagy Sikertelen.
+   Folyamatban állapotra a raktáros állítja kivételezéskor. */
+const STATUSZ_SORREND = ['New', 'Draft', 'Wait', 'Scheduled', 'InProgress', 'Completed', 'Failed'];
+
 const STATUSZ_NEV = {
   New: 'Új',
   Draft: 'Tervezet',
@@ -43,6 +80,16 @@ const STATUSZ_OSZTALY = {
   InProgress: 'status-progress',
   Completed: 'status-completed',
   Failed: 'status-failed',
+};
+
+const STATUSZ_PONT = {
+  New: 'new',
+  Draft: 'draft',
+  Wait: 'wait',
+  Scheduled: 'scheduled',
+  InProgress: 'progress',
+  Completed: 'completed',
+  Failed: 'failed',
 };
 
 // Aktív = még nem zárult le. A raktár csak ezekre tart fenn készletet.

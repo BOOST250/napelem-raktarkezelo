@@ -24,9 +24,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Onnan a users tábla bármelyik fiókjával be lehet lépni, és a
     // szerepkör alapján irányít a megfelelő felületre.
     // Az aloldalak a pages/ alatt futnak, ezért kell egy szinttel több "..".
-    const belepoUt = location.pathname.includes("/pages/")
-        ? "../../belepes/"
-        : "../belepes/";
+    const belepoUt = Api.belepesUt();
 
 
     // =========================
@@ -52,6 +50,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     // Innentől biztos, hogy jogosult a felhasználó – megjelenhet az oldal.
+    document.dispatchEvent(new CustomEvent("szakember-kesz", { detail: currentUser }));
+    if (CONFIG.USE_MOCK) demoSav();
     document.body.classList.remove("auth-pending");
 
 
@@ -139,6 +139,44 @@ document.addEventListener("DOMContentLoaded", async function () {
 // A confirm() / alert() helyett. Promise-t ad vissza: true, ha a
 // felhasználó jóváhagyta. Ha az okGomb null, csak egy "Rendben" gomb
 // jelenik meg (hibaüzenethez).
+
+function demoSav() {
+    const tartalom = document.querySelector(".main-content");
+    if (!tartalom || document.getElementById("demoSav")) return;
+
+    const sav = document.createElement("div");
+    sav.id = "demoSav";
+    sav.className = "demo-sav";
+
+    const szoveg = document.createElement("span");
+    szoveg.textContent = "Demo mód: a módosítások csak ebben a böngészőben tárolódnak.";
+
+    const vissza = document.createElement("button");
+    vissza.type = "button";
+    vissza.className = "demo-sav-gomb";
+    vissza.textContent = "Demo adatok visszaállítása";
+    vissza.addEventListener("click", async function () {
+        const rendben = await megerosit(
+            "Demo adatok",
+            "Visszaállítod a beépített tesztadatokat? A bejelentkezés megmarad.",
+            "Visszaállítás"
+        );
+        if (!rendben) return;
+        MockBackend.visszaallit();
+        location.reload();
+    });
+
+    const eles = document.createElement("a");
+    eles.className = "demo-sav-gomb";
+    eles.href = location.pathname + "?mock=0";
+    eles.textContent = "Éles mód";
+
+    sav.appendChild(szoveg);
+    sav.appendChild(vissza);
+    sav.appendChild(eles);
+    tartalom.prepend(sav);
+}
+
 
 function megerosit(cim, szoveg, okGomb) {
 

@@ -105,21 +105,6 @@
 
         <div class="sidebar-bottom">
 
-            <a
-                href="#"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⚙
-                </span>
-
-                <span>
-                    Beállítások
-                </span>
-
-            </a>
-
-
             <button
                 id="logoutButton"
                 class="nav-item logout-button">
@@ -270,6 +255,7 @@
                                 type="text"
                                 id="location"
                                 name="location"
+                                maxlength="255"
                                 placeholder="Pl. Zalaegerszeg, Kossuth Lajos utca 12."
                                 required>
 
@@ -292,6 +278,7 @@
                                 id="description"
                                 name="description"
                                 rows="5"
+                                maxlength="5000"
                                 placeholder="Írd le röviden a projektet..."></textarea>
 
                             <span class="input-hint">
@@ -349,6 +336,7 @@
                                 type="text"
                                 id="customerName"
                                 name="customer_name"
+                                maxlength="100"
                                 placeholder="Pl. Kovács János"
                                 required>
 
@@ -363,21 +351,17 @@
                             <div class="form-group">
 
                                 <label for="customerEmail">
-
                                     E-mail cím
-
-                                    <span class="required">
-                                        *
-                                    </span>
-
                                 </label>
 
                                 <input
                                     type="email"
                                     id="customerEmail"
                                     name="customer_email"
-                                    placeholder="pelda@email.hu"
-                                    required>
+                                    maxlength="100"
+                                    placeholder="pelda@email.hu">
+
+                                <span class="input-hint">Nem kötelező.</span>
 
                             </div>
 
@@ -385,21 +369,17 @@
                             <div class="form-group">
 
                                 <label for="customerPhone">
-
                                     Telefonszám
-
-                                    <span class="required">
-                                        *
-                                    </span>
-
                                 </label>
 
                                 <input
                                     type="tel"
                                     id="customerPhone"
                                     name="customer_phone"
-                                    placeholder="+36 30 123 4567"
-                                    required>
+                                    maxlength="20"
+                                    placeholder="+36 30 123 4567">
+
+                                <span class="input-hint">Nem kötelező, legfeljebb 20 karakter.</span>
 
                             </div>
 
@@ -505,6 +485,8 @@
 
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
+<script src="../js/mock.js"></script>
+<script src="../js/validate.js"></script>
 <script src="../js/app.js"></script>
 
 <script src="../js/new-project.js"></script>

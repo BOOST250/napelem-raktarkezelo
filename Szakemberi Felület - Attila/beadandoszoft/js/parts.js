@@ -49,7 +49,9 @@ function displayParts(partList) {
         `${partList.length} alkatrész`;
 
     if (partList.length === 0) {
-        showMessage("Nincs a keresésnek megfelelő alkatrész.");
+        showMessage(parts.length === 0
+            ? "Még nincs alkatrész a raktárban."
+            : "Nincs a keresésnek megfelelő alkatrész.");
         return;
     }
 
@@ -61,7 +63,9 @@ function displayParts(partList) {
         const row = document.createElement("tr");
 
         // Szabad készlet jelölése: zöld, ha van; sárga, ha elfogyott
-        const szabadOsztaly = part.szabad > 0 ? "status-completed" : "status-wait";
+        const szabadOsztaly = part.szabad > 0
+            ? "status-completed"
+            : (part.szabad < 0 ? "status-failed" : "status-wait");
 
         row.innerHTML = `
             <td>
@@ -87,7 +91,7 @@ function displayParts(partList) {
 
             <td>
                 <span class="project-status ${szabadOsztaly}">
-                    ${formatDb(Math.max(part.szabad, 0))}
+                    ${formatDb(part.szabad)}
                 </span>
             </td>
 

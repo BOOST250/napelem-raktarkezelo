@@ -777,3 +777,117 @@ body.auth-pending .app {
 .modal-gomb-fo:hover {
     background: var(--primary-dark);
 }
+
+button.primary-button,
+button.secondary-button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+button.primary-button {
+    border: 1px solid #bfdbfe;
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.danger-button {
+    color: var(--red);
+    border-color: #fecaca;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.demo-sav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 35px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 13px;
+    border-bottom: 1px solid #fcd34d;
+}
+
+.demo-sav-gomb {
+    border: 1px solid #fcd34d;
+    background: white;
+    color: #92400e;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.dashboard-message {
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    font-size: 13px;
+}
+
+.dashboard-empty {
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+.dashboard-recent {
+    margin-top: 20px;
+}
+
+.recent-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.recent-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 4px;
+    border-top: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+}
+
+.recent-row strong {
+    display: block;
+    font-size: 14px;
+}
+
+.recent-place {
+    display: block;
+    margin-top: 3px;
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.project-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.status-new { background: #dbeafe; color: #1d4ed8; }
+.status-draft { background: #ede9fe; color: #6d28d9; }
+.status-wait { background: #fef3c7; color: #b45309; }
+.status-scheduled { background: #ffedd5; color: #c2410c; }
+.status-progress { background: #cffafe; color: #0e7490; }
+.status-completed { background: #dcfce7; color: #15803d; }
+.status-failed { background: #fee2e2; color: #b91c1c; }
