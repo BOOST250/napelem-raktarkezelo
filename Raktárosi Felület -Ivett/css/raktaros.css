@@ -1,0 +1,127 @@
+/* A raktárosi felület saját elemei. Az alap (oldalsáv, tábla, gombok)
+   a css/style.css, a raktárvezetői felület megjelenése, hogy a két
+   raktári képernyő egyformán nézzen ki. */
+
+.note {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-soft-2);
+  font-size: 13px;
+}
+.note.warn { background: var(--orange-soft); border-color: #fde68a; }
+.note.ok { background: var(--green-soft); border-color: #bbf7d0; }
+.note p { margin: 6px 0 0; }
+.note .btn { margin-top: 10px; }
+
+.part-card + .part-card { margin-top: 16px; }
+.part-card .table { min-width: 560px; }
+.part-card .table td,
+.part-card .table th { padding-top: 10px; padding-bottom: 10px; }
+
+tr.on-route td { background: #f0fdf4; }
+tr.off-route td { color: var(--text-light); }
+.pick-flag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-text);
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.route { list-style: none; }
+.route-stop {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.route-stop:first-child { border-top: 0; padding-top: 0; }
+.route-no {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: bold;
+}
+.route-stop.done { opacity: .6; }
+.route-stop.done .route-no { background: var(--green); }
+.route-stop.back .route-no { background: var(--sidebar); }
+.route-title { font-weight: bold; font-size: 14px; }
+.route-meta { margin-top: 3px; color: var(--text-light); font-size: 12px; }
+.route-lines { margin: 6px 0 0; padding: 0; list-style: none; }
+.route-lines li { margin-top: 2px; }
+
+.wh-scroll { overflow-x: auto; }
+.wh-cross {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--sidebar);
+  color: #d1d5db;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.wh-grid {
+  display: grid;
+  grid-template-columns: 76px repeat(var(--cols), minmax(72px, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+}
+.wh-head,
+.wh-label {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-light);
+}
+.wh-head { justify-content: center; }
+.wh-cell {
+  min-height: 74px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface-2);
+  padding: 8px;
+}
+.wh-cell.stop {
+  border-style: solid;
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.wh-no {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+}
+.wh-id { font-size: 12px; font-weight: bold; line-height: 1.35; }
+
+.sum-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.sum-row .plan-sum { margin: 0; }
+
+@media (max-width: 700px) {
+  .route-stop { grid-template-columns: 36px minmax(0, 1fr); }
+  .route-stop .btn { grid-column: 2; }
+}

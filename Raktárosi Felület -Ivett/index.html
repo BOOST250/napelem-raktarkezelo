@@ -1,59 +1,81 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Raktárosi felület</title>
-
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Napelemrendszer – Raktárosi felület</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5' fill='%23e6a817'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/raktaros.css">
 </head>
-<body>
-
-<div class="layout">
-
+<!-- auth-pending: a felület rejtve marad, amíg a bejelentkezés ellenőrzése tart -->
+<body class="auth-pending">
+  <div class="app">
     <aside class="sidebar">
-
-        <div class="brand">
-            <div>
-                <div class="brand-title">Raktár</div>
-                <div class="brand-sub">Raktárosi felület</div>
-            </div>
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">☀</div>
+        <div class="logo-text">
+          <strong>SolarSystem</strong>
+          <span>Raktárosi felület</span>
         </div>
+      </div>
 
-        <nav class="nav">
-            #projektek
-                Projektek
-            </a>
+      <nav class="navigation">
+        <a href="#kezdolap" class="nav-item" data-view="kezdolap" title="Kezdőlap">
+          <span class="nav-icon">⌂</span><span>Kezdőlap</span>
+        </a>
+        <a href="#projektek" class="nav-item" data-view="projektek" title="Projektek">
+          <span class="nav-icon">▤</span><span>Projektek</span>
+          <span class="nav-badge" id="badge-projektek" hidden></span>
+        </a>
+        <a href="#kivetelezes" class="nav-item" data-view="kivetelezes" title="Kivételezés">
+          <span class="nav-icon">▣</span><span>Kivételezés</span>
+        </a>
+        <a href="#utvonal" class="nav-item" data-view="utvonal" title="Útvonal">
+          <span class="nav-icon">↝</span><span>Útvonal</span>
+        </a>
+      </nav>
 
-            #kivetelezes
-                Kivételezés
-            </a>
-
-            #utvonal
-                Útvonal
-            </a>
-        </nav>
-
+      <div class="sidebar-bottom">
+        <span id="mode-badge" class="mode-badge"></span>
+        <button type="button" id="reset-demo" class="nav-item nav-button" title="Demo adatok visszaállítása" hidden>
+          <span class="nav-icon">↺</span><span>Demo adatok visszaállítása</span>
+        </button>
+        <button type="button" id="logoutButton" class="nav-item nav-button" title="Kijelentkezés">
+          <span class="nav-icon">↪</span><span>Kijelentkezés</span>
+        </button>
+      </div>
     </aside>
 
-    <main class="main">
-
-        <header class="page-head">
-            <div>
-                <h1 id="page-title"></h1>
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="page-title"></h1>
+          <p id="page-sub"></p>
+        </div>
+        <div class="topbar-right">
+          <div id="page-actions" class="page-actions"></div>
+          <div class="user-info">
+            <div class="user-avatar" id="user-avatar" aria-hidden="true"></div>
+            <div class="user-details">
+              <strong id="user-name"></strong>
+              <span id="user-role"></span>
             </div>
-        </header>
+          </div>
+        </div>
+      </header>
 
-        <section id="view"></section>
-
+      <section id="view" class="page"></section>
     </main>
+  </div>
 
-</div>
+  <dialog id="modal"></dialog>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
-<script src="js/config.js"></script>
-<script src="js/api.js"></script>
-<script src="js/mock.js"></script>
-<script src="js/app.js"></script>
-
+  <script src="js/config.js"></script>
+  <script src="js/route.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/mock.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bejelentkezés – Raktárosi felület</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='5' fill='%23e6a817'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="login-page">
+    <div class="login-card">
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">☀</div>
+        <div class="logo-text">
+          <strong>SolarSystem</strong>
+          <span>Raktárosi felület</span>
+        </div>
+      </div>
+
+      <form id="login-form" novalidate>
+        <h1>Bejelentkezés</h1>
+        <p class="login-sub">Raktárosi felület – lépj be a felhasználóneveddel. Demo módban ez a saját belépő; élesben a közös belépő oldal dönt a szerepkörről.</p>
+
+        <div id="login-info" class="login-info" role="status" hidden></div>
+        <div id="login-error" class="form-error" role="alert" hidden></div>
+
+        <label class="field">
+          <span>Felhasználónév</span>
+          <input class="input" id="username" name="username" autocomplete="username" required autofocus>
+        </label>
+        <label class="field">
+          <span>Jelszó</span>
+          <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+        </label>
+
+        <button type="submit" class="btn primary" id="login-submit">Bejelentkezés</button>
+
+        <div id="demo-hint" class="login-hint" hidden>
+          <strong>Demo mód – tesztfelhasználók</strong>
+          <ul>
+            <li><button type="button" data-user="raktaros" data-pass="raktaros123">raktaros / raktaros123</button> – raktáros</li>
+            <li><button type="button" data-user="raktarvezeto" data-pass="raktar123">raktarvezeto / raktar123</button> – nincs jogosultsága</li>
+            <li><button type="button" data-user="szakember" data-pass="szakember123">szakember / szakember123</button> – nincs jogosultsága</li>
+          </ul>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/mock.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
