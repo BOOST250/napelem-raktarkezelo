@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * Másold ezt database.local.php néven, ha a XAMPP MySQL jelszava nem üres.
+ * A database.local.php nincs a gitben.
+ *
+ * A host a MySQL a XAMPP-gépen. Másik gépről böngészve is localhost marad:
+ * a PHP és a MySQL ugyanazon a gépen fut.
+ */
+$host = 'localhost';
+$username = 'root';
+$password = '';
+$database = 'napelemrendszer';
