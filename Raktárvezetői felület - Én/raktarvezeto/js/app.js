@@ -19,7 +19,7 @@ const helyKod = r => `S${r.sor} · O${r.oszlop} · P${r.polc} · R${r.rekesz}`;
 const uresRekesz = r => r.alkatresz_id === null || r.darab === 0;
 // Egy rekeszbe ennyi db férhet ebből az alkatrészből. Két korlát van, és a
 // szigorúbb érvényes: az alkatrész max. darab/rekesz értéke és a rekesz saját
-// kapacitása. (Demo módban nincs rekesz-kapacitás, ott max_kapacitas = Infinity.)
+// kapacitása. Ha a kapacitás hiányzik, nem szűkít.
 const korlat = (r, a) => Math.min(a.max_darab, r.max_kapacitas ?? Infinity);
 const osszeg = (lista, fn) => lista.reduce((s, x) => s + fn(x), 0);
 
@@ -86,8 +86,8 @@ function hibaAllapot(err) {
   return `<div class="card empty-state error-state">
     <h2>Nem sikerült betölteni az adatokat</h2>
     <p>${esc(err.message)}</p>
-    ${CONFIG.USE_MOCK ? '' : `<p class="muted small">Ellenőrizd a <code>js/config.js</code> fájlban az <code>API_BASE</code> címet,
-      vagy próbáld ki demo módban: <a href="?mock=1${location.hash}">index.html?mock=1</a></p>`}
+    <p class="muted small">Ellenőrizd a <code>js/config.js</code> fájlban az <code>API_BASE</code> címet
+      (<code>${esc(CONFIG.API_BASE)}</code>).</p>
     <button type="button" class="btn" data-ujra>Újrapróbálás</button>
   </div>`;
 }
@@ -862,7 +862,7 @@ function rekeszekNezet(el, { rekeszek, alkatreszek }) {
 
 function ujRekeszModal(rekeszek) {
   const utolso = [...rekeszek].sort(helyRendez).pop();
-  // Kapacitás: az utoljára felvett rekeszé a minta; ha az korlátlan (demo mód), 20.
+  // Kapacitás: az utoljára felvett rekeszé a minta; ha az nincs meg, 20.
   const utolsoKap = utolso && Number.isFinite(utolso.max_kapacitas) ? utolso.max_kapacitas : 20;
   const alap = utolso
     ? { sor: utolso.sor, oszlop: utolso.oszlop, polc: utolso.polc, rekesz: utolso.rekesz + 1, max_kapacitas: utolsoKap }
@@ -1106,26 +1106,8 @@ async function inditas() {
   document.body.classList.remove('auth-pending');
 
   const mod = $('#mode-badge');
-  const reset = $('#reset-demo');
-  if (CONFIG.USE_MOCK) {
-    mod.textContent = 'Demo mód – tesztadatok';
-    mod.classList.add('demo');
-    reset.hidden = false;
-    reset.addEventListener('click', async () => {
-      const rendben = await megerosit({
-        cim: 'Demo adatok visszaállítása',
-        szoveg: 'Visszaállítod a demo adatokat a kezdőállapotra?',
-        gomb: 'Visszaállítás'
-      });
-      if (!rendben) return;
-      MockBackend.reset();
-      toast('Demo adatok visszaállítva.');
-      frissit();
-    });
-  } else {
-    mod.textContent = `API: ${CONFIG.API_BASE.replace(/^https?:\/\//, '')}`;
-    mod.title = CONFIG.API_BASE;
-  }
+  mod.textContent = `API: ${CONFIG.API_BASE.replace(/^https?:\/\//, '')}`;
+  mod.title = CONFIG.API_BASE;
 
   $('#logoutButton').addEventListener('click', async () => {
     const rendben = await megerosit({
