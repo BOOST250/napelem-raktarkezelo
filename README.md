@@ -28,6 +28,4 @@ PHP + MySQL backend, sima HTML/CSS/JavaScript felületek, keretrendszer nélkül
    ```
 4. Nyisd meg: <http://localhost/napelem/belepes/>
 
-A felhasználókat az adminisztrátor veszi fel (`users` tábla); regisztráció nincs. A jelszavakat a backend hash-elve tárolja.
-
-A raktárvezetői felület backend nélkül, demo módban is kipróbálható – lásd [a felület README-jét](<Raktárvezetői felület - Én/raktarvezeto/README.md>).
+A felhasználókat az adminisztrátor veszi fel (`users` tábla); regisztráció nincs. A jelszavakat a backend hash-elve tárolja. Mindhárom felület a PHP API-t hívja (`/napelem/api`).

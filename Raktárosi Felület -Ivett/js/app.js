@@ -1,5 +1,8 @@
 let aktualisProjekt = null;
 
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 async function projektekNezet() {
 
     const projektek = await Api.projektek();
@@ -29,15 +32,15 @@ async function projektekNezet() {
 
                     <tr>
 
-                        <td>${p.nev}</td>
+                        <td>${esc(p.nev)}</td>
 
-                        <td>${p.statusz}</td>
+                        <td>${esc(p.statusz)}</td>
 
                         <td>
 
                             <button
                                 class="btn primary"
-                                onclick="inditas(${p.id})">
+                                onclick="inditas(${Number(p.id)})">
 
                                 Kivételezés
 
@@ -96,9 +99,9 @@ async function kivetelezesNezet(){
 
                 <li>
 
-                    ${a.nev}
+                    ${esc(a.nev)}
                     <br>
-                    <small>${a.hely}</small>
+                    <small>${esc(a.hely)}</small>
 
                 </li>
 
@@ -139,7 +142,7 @@ async function utvonalNezet(){
 
         ${alkatreszek.map(a => `
 
-            <li>${a.hely}</li>
+            <li>${esc(a.hely)}</li>
 
         `).join("")}
 
@@ -150,24 +153,25 @@ async function utvonalNezet(){
     `;
 }
 
+function hibaNezet(err) {
+    document.getElementById("page-title").textContent = "Hiba";
+    const view = document.getElementById("view");
+    view.replaceChildren();
+    const p = document.createElement("p");
+    p.textContent = (err && err.message) || "Nem sikerült betölteni az adatokat.";
+    view.appendChild(p);
+}
+
 function router(){
 
     const hash =
         location.hash.replace("#","");
 
-    if(hash === "kivetelezes"){
+    const nezet = hash === "kivetelezes" ? kivetelezesNezet
+        : hash === "utvonal" ? utvonalNezet
+        : projektekNezet;
 
-        kivetelezesNezet();
-        return;
-    }
-
-    if(hash === "utvonal"){
-
-        utvonalNezet();
-        return;
-    }
-
-    projektekNezet();
+    Promise.resolve(nezet()).catch(hibaNezet);
 }
 
 window.addEventListener(

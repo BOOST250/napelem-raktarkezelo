@@ -1,14 +1,8 @@
 /* ================= API réteg =================
-   Minden szerverhívás ezen a fájlon megy át (fetch).
+   Minden szerverhívás ezen a fájlon megy át (fetch), Eszter PHP végpontjaira:
+   parts.php, bins.php, projects.php, project_parts.php, receiving.php,
+   valamint login.php, me.php, logout.php.
 
-   A felület kilenc műveletet használ (lásd a return blokkot a fájl alján).
-   Ebből kettő megvalósítás létezik, és a CONFIG.USE_MOCK választ köztük:
-
-     Demo  – a MockBackend válaszol localStorage-ból, backend nélkül.
-     Eles  – Eszter PHP végpontjai: parts.php, bins.php, projects.php,
-             project_parts.php, receiving.php.
-
-   Miért van szükség a két rétegre?
    Eszter API-ja táblánként egy fájl, angol mezőnevekkel és ?id= paraméterrel,
    a felület viszont magyar kulcsú, összesített objektumokkal dolgozik
    (pl. egy alkatrészhez tartozó készlet és lefoglalt darabszám). Ez az
@@ -29,20 +23,11 @@ class ApiError extends Error {
 const Api = (() => {
   /* ---------------- Közös HTTP-réteg ---------------- */
 
-  /* Lejárt / hiányzó bejelentkezés esetén vissza a belépő oldalra.
-
-     Valódi módban a KÖZÖS belépő fogadja (../belepes/): ott a users tábla
-     bármelyik fiókjával be lehet lépni, és a szerepkör alapján irányít a
-     megfelelő felületre.
-
-     Demo módban marad a felület saját login.html-je, mert a közös belépő a
-     valódi PHP API-t hívja – demo módban pedig nincs backend. A ?mock=…
-     paraméter ilyenkor megmarad. */
+  /* Lejárt / hiányzó bejelentkezés esetén vissza a közös belépőre
+     (../belepes/): ott a users tábla bármelyik fiókjával be lehet lépni,
+     és a szerepkör alapján irányít a megfelelő felületre. */
   function bejelentkezesre(hash = '') {
-    const ut = CONFIG.USE_MOCK
-      ? 'login.html' + location.search
-      : '../belepes/';
-    location.replace(ut + hash);
+    location.replace('../belepes/' + hash);
   }
 
   async function kuld(method, alap, url, body) {
@@ -93,9 +78,8 @@ const Api = (() => {
     }
   }
 
-  // Bejelentkezési végpontok: login.php / me.php / logout.php (demo módban /auth/login stb.).
+  // Bejelentkezési végpontok: login.php / me.php / logout.php.
   function authRequest(method, nev, body) {
-    if (CONFIG.USE_MOCK) return MockBackend.handle(method, `/auth/${nev}`, body);
     return kuld(method, CONFIG.AUTH_BASE, `${CONFIG.AUTH_BASE}/${nev}.php`, body);
   }
 
@@ -104,7 +88,6 @@ const Api = (() => {
 
   const szam = v => (v === null || v === undefined || v === '' ? 0 : Number(v));
   const szamVagyNull = v => (v === null || v === undefined || v === '' ? null : Number(v));
-  const lista = alakit => data => (Array.isArray(data) ? data.map(alakit) : []);
 
   const alkatresz = a => ({
     id: szam(a.id),
@@ -123,8 +106,8 @@ const Api = (() => {
     rekesz: szam(r.rekesz),
     alkatresz_id: szamVagyNull(r.alkatresz_id),
     darab: szam(r.darab),
-    // Rekeszenkénti kapacitás (Eszter bins.max_capacity mezője). Demo módban
-    // nincs ilyen korlát, ezért ott Infinity – a számítások MIN()-t vesznek.
+    // Rekeszenkénti kapacitás (Eszter bins.max_capacity mezője). Ha a mező
+    // hiányzik, a számítások MIN()-je nem szűkít (Infinity).
     max_kapacitas: r.max_kapacitas === undefined || r.max_kapacitas === null
       ? Infinity
       : Number(r.max_kapacitas),
@@ -158,22 +141,7 @@ const Api = (() => {
     role: String(u?.role ?? ''),
   });
 
-  /* ================= Demo megvalósítás ================= */
-
-  const mock = (method, path, body) => MockBackend.handle(method, path, body);
-
-  const Demo = {
-    alkatreszek: () => mock('GET', '/alkatreszek').then(lista(alkatresz)),
-    ujAlkatresz: adat => mock('POST', '/alkatreszek', adat),
-    modositAlkatresz: (id, adat) => mock('PUT', `/alkatreszek/${id}`, adat),
-    rekeszek: () => mock('GET', '/rekeszek').then(lista(rekesz)),
-    ujRekesz: adat => mock('POST', '/rekeszek', adat),
-    bevetelezes: adat => mock('POST', '/bevetelezes', adat),
-    hianyzoAlkatreszek: () => mock('GET', '/hianyzo').then(lista(hiany)),
-    lefoglaltAlkatreszek: () => mock('GET', '/lefoglalt').then(lista(foglalas)),
-  };
-
-  /* ================= Éles megvalósítás ================= */
+  /* ================= Eszter PHP végpontjai ================= */
 
   // Nyers táblavégpontok (Eszter mezőneveivel, átalakítás nélkül).
   const nyers = {
@@ -343,10 +311,7 @@ const Api = (() => {
     },
   };
 
-  /* ================= Kifelé látszó felület =================
-     A választás hívásonként történik, mert a ?mock=… az URL-ből jön. */
-
-  const muvelet = nev => (...args) => (CONFIG.USE_MOCK ? Demo : Eles)[nev](...args);
+  /* ================= Kifelé látszó felület ================= */
 
   return {
     login: (username, password) => authRequest('POST', 'login', { username, password }).then(d => felhasznalo(d?.user)),
@@ -354,16 +319,16 @@ const Api = (() => {
     logout: () => authRequest('POST', 'logout'),
     bejelentkezesre,
 
-    alkatreszek: muvelet('alkatreszek'),
-    ujAlkatresz: muvelet('ujAlkatresz'),
-    modositAlkatresz: muvelet('modositAlkatresz'),
+    alkatreszek: Eles.alkatreszek,
+    ujAlkatresz: Eles.ujAlkatresz,
+    modositAlkatresz: Eles.modositAlkatresz,
 
-    rekeszek: muvelet('rekeszek'),
-    ujRekesz: muvelet('ujRekesz'),
+    rekeszek: Eles.rekeszek,
+    ujRekesz: Eles.ujRekesz,
 
-    bevetelezes: muvelet('bevetelezes'),
+    bevetelezes: Eles.bevetelezes,
 
-    hianyzoAlkatreszek: muvelet('hianyzoAlkatreszek'),
-    lefoglaltAlkatreszek: muvelet('lefoglaltAlkatreszek'),
+    hianyzoAlkatreszek: Eles.hianyzoAlkatreszek,
+    lefoglaltAlkatreszek: Eles.lefoglaltAlkatreszek,
   };
 })();

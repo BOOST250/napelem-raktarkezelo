@@ -9,7 +9,7 @@
   const hibaDoboz = $('#login-error');
   const infoDoboz = $('#login-info');
 
-  const tovabb = () => location.replace('index.html' + location.search);
+  const tovabb = () => location.replace('index.html');
   const nincsJog = role =>
     `Ehhez a felülethez raktárvezetői jogosultság kell (a te szerepköröd: ${SZEREPKOR_NEV[role] ?? role}).`;
 
@@ -22,19 +22,7 @@
   if (location.hash === '#kijelentkezve') {
     infoDoboz.textContent = 'Sikeresen kijelentkeztél.';
     infoDoboz.hidden = false;
-    history.replaceState(null, '', location.pathname + location.search);
-  }
-
-  // Demo módban a tesztfelhasználókra kattintva kitöltődik az űrlap
-  if (CONFIG.USE_MOCK) {
-    $('#demo-hint').hidden = false;
-    $('#demo-hint').addEventListener('click', e => {
-      const b = e.target.closest('button[data-user]');
-      if (!b) return;
-      $('#username').value = b.dataset.user;
-      $('#password').value = b.dataset.pass;
-      gomb.focus();
-    });
+    history.replaceState(null, '', location.pathname);
   }
 
   // Ha már be van jelentkezve raktárvezetőként, egyből tovább

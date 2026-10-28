@@ -4,32 +4,21 @@ Sima HTML + CSS + JavaScript, keretrendszer és telepítés nélkül. A szerverr
 
 ## Futtatás
 
-**Demo mód (backend nélkül)** – alapértelmezett (`js/config.js` → `USE_MOCK: true`):
-- Nyisd meg az `index.html`-t böngészőben, vagy tedd a mappát a XAMPP `htdocs` alá és nyisd meg `http://localhost/.../raktarvezeto/`.
-- Beépített tesztadatokkal működik (8 alkatrész, 24 rekesz, 5 projekt), a módosítások a böngészőben (localStorage) maradnak.
-- A bal alsó **„Demo adatok visszaállítása”** gomb visszaállítja a kezdőállapotot.
+A felület az 1. fő PHP API-ját hívja. A cím a `js/config.js` fájlban van (`API_BASE`, alapból `/napelem/api`).
 
-**Éles mód (az 1. fő PHP API-jával)**:
-1. `js/config.js`: `API_BASE` = a PHP API címe, `USE_MOCK: false`
-2. vagy módosítás nélkül: `index.html?mock=0` (vissza demóra: `?mock=1`)
+1. Indítsd el az Apache-t és a MySQL-t a XAMPP-ban, és importáld az adatbázist (lásd a gyökér README-t).
+2. A mappa a `htdocs/napelem/raktarvezeto/` helyre kerüljön – a GitHub Actions deploy is így rakja össze.
+3. Nyisd meg: <http://localhost/napelem/belepes/>. Raktárvezetői szerepkörrel a közös belépő ide irányít.
+
+A frontendet `http://localhost…` címről nyisd meg (XAMPP `htdocs`), **ne dupla kattintással** – `file://` alól a böngésző nem küldi el a session-cookie-t.
 
 ## Bejelentkezés
 
-A felület csak bejelentkezés után érhető el, és csak **raktárvezető** (`warehouse_manager`) szerepkörrel. Bejelentkezés nélkül az `index.html` a `login.html`-re irányít. Regisztráció nincs, a felhasználókat az adminisztrátor veszi fel.
+A felület csak bejelentkezés után érhető el, és csak **raktárvezető** (`warehouse_manager`) szerepkörrel. Bejelentkezés nélkül az `index.html` a közös belépőre (`../belepes/`) irányít. Regisztráció nincs, a felhasználókat az adminisztrátor veszi fel.
 
-**Demo mód** – beépített tesztfelhasználók (a login oldalon rájuk kattintva kitöltődik az űrlap):
-
-| Felhasználónév | Jelszó | Szerepkör | Beléphet? |
-|---|---|---|---|
-| `raktarvezeto` | `raktar123` | Raktárvezető | igen |
-| `szakember` | `szakember123` | Szakember | nem – jogosultsági hiba |
-| `raktaros` | `raktaros123` | Raktáros | nem – jogosultsági hiba |
-
-A demo munkamenet a localStorage-ban van, a „Demo adatok visszaállítása” nem jelentkeztet ki.
-
-**Éles mód** – PHP session (cookie) a 2. fő backendjében (`napelem/auth/Auth.php`):
+A munkamenet PHP session (cookie) a backendben (`napelem/auth/Auth.php`):
 - `js/config.js` → `AUTH_BASE` = az auth-végpontok mappája (alapból `/napelem/api`).
-- A frontendet `http://localhost…` címről nyisd meg (pl. XAMPP `htdocs` vagy `localhost:8123`), **ne dupla kattintással** – `file://` alól a böngésző nem küldi el a session-cookie-t.
+- A felület saját `login.html` oldala ugyanezeket a végpontokat hívja; élesben a közös belépő a belépési pont.
 - Kezdő felhasználó felvétele: `POST users.php` `{"username":"admin", "password":"…", "role":"warehouse_manager"}` – a jelszó már hash-elve kerül az adatbázisba. A régi, sima szövegként mentett jelszavak is működnek: első belépéskor automatikusan hash-re cserélődnek.
 
 | | |
@@ -38,7 +27,7 @@ A demo munkamenet a localStorage-ban van, a „Demo adatok visszaállítása” 
 | `GET me.php` | `{"user":{...}}` vagy 401, ha nincs bejelentkezve |
 | `POST logout.php` | `{"ok":true}` – munkamenet törlése |
 
-Ezek a végpontok a kérő `Origin`-t küldik vissza `Access-Control-Allow-Credentials: true` mellett (cookie-hoz a `*` nem engedett), és a frontend csak ezeket hívja `credentials: 'include'`-dal. A többi végpont (`parts`, `bins` …) még nincs védve; ehhez az elejükre kell: `$auth = new Auth($conn); $auth->requireLogin(['warehouse_manager']);` (401 / 403 – a frontend 401-re a login oldalra irányít).
+Ezek a végpontok a kérő `Origin`-t küldik vissza `Access-Control-Allow-Credentials: true` mellett (cookie-hoz a `*` nem engedett), és a frontend csak ezeket hívja `credentials: 'include'`-dal. A többi végpont (`parts`, `bins` …) még nincs védve; ehhez az elejükre kell: `$auth = new Auth($conn); $auth->requireLogin(['warehouse_manager']);` (401 / 403 – a frontend 401-re a közös belépőre irányít).
 
 ## Követelmények → hol találod
 
@@ -59,9 +48,8 @@ raktarvezeto/
 ├── index.html      oldalváz, menü
 ├── login.html      bejelentkező oldal
 ├── css/style.css   megjelenés (világos/sötét téma, mobil nézet)
-├── js/config.js    API cím, demo mód kapcsoló, engedett szerepkör
+├── js/config.js    API cím, engedett szerepkör
 ├── js/api.js       fetch hívások + válaszok egységesítése, login/me/logout
-├── js/mock.js      demo backend + demo felhasználók (csak demo módban)
 ├── js/login.js     bejelentkezés logikája
 └── js/app.js       nézetek, űrlapok, logika, belépés-ellenőrzés
 ```
