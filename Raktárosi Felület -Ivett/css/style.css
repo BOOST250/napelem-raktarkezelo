@@ -1,0 +1,369 @@
+/* =========================================
+   ALAPBEÁLLÍTÁSOK
+========================================= */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --sidebar-width: 250px;
+
+  --background: #f5f7fb;
+  --white: #ffffff;
+  --surface-2: #f9fafb;
+
+  --text: #1f2937;
+  --text-light: #6b7280;
+
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-soft: #eff6ff;
+
+  --sidebar: #111827;
+  --sidebar-hover: #1f2937;
+
+  --green: #16a34a;
+  --green-text: #15803d;
+  --green-soft: #dcfce7;
+  --orange: #f59e0b;
+  --orange-text: #b45309;
+  --orange-soft: #fef3c7;
+  --red: #dc2626;
+  --red-text: #b91c1c;
+  --red-soft: #fee2e2;
+  --cyan-text: #0e7490;
+  --cyan-soft: #cffafe;
+
+  --focus: 0 0 0 3px rgba(37, 99, 235, .25);
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--background);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+h1, h2, h3 { line-height: 1.25; }
+h2 { font-size: 16px; margin-bottom: 6px; }
+h3 { font-size: 15px; }
+a { color: var(--primary); }
+[hidden] { display: none !important; }
+
+.muted { color: var(--text-light); }
+.small { font-size: 12px; }
+.strong { font-weight: bold; }
+.text-ok { color: var(--green-text); }
+
+/* A bejelentkezés ellenőrzéséig semmi nem látszik */
+.auth-pending .app { visibility: hidden; }
+
+
+/* =========================================
+   KERET, OLDALSÁV
+========================================= */
+
+.app { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--sidebar);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 10;
+  overflow-y: auto;
+}
+
+.logo {
+  height: 85px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid #263041;
+}
+
+.logo-icon {
+  width: 40px; height: 40px; flex: none;
+  border-radius: 10px;
+  background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin-right: 12px;
+}
+
+.logo-text { display: flex; flex-direction: column; }
+.logo-text strong { font-size: 16px; }
+.logo-text span { color: #9ca3af; font-size: 11px; margin-top: 3px; }
+
+.navigation { padding: 25px 14px; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  color: #d1d5db;
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: background .2s;
+}
+.nav-item:hover { background: var(--sidebar-hover); color: white; }
+.nav-item.active { background: var(--primary); color: white; }
+.nav-item:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+.nav-icon { width: 24px; margin-right: 10px; text-align: center; font-size: 16px; }
+
+.sidebar-bottom { margin-top: auto; padding: 14px; border-top: 1px solid #263041; }
+.nav-button { background: none; border: 0; cursor: pointer; font-family: inherit; text-align: left; }
+.mode-badge {
+  display: block;
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--orange-soft);
+  color: var(--orange-text);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+
+/* =========================================
+   FŐ TARTALOM
+========================================= */
+
+.main-content { flex: 1; margin-left: var(--sidebar-width); min-width: 0; }
+
+.topbar {
+  min-height: 85px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 32px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-title h1 { font-size: 22px; }
+.topbar-title p { color: var(--text-light); margin-top: 2px; }
+
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--primary-soft); color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold;
+}
+.user-details { display: flex; flex-direction: column; line-height: 1.3; }
+.user-details span { color: var(--text-light); font-size: 12px; }
+
+.page { padding: 28px 32px 48px; max-width: 980px; }
+.page > * + * { margin-top: 16px; }
+
+
+/* =========================================
+   KÁRTYÁK, TÁBLÁZAT, GOMBOK, JELVÉNYEK
+========================================= */
+
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; }
+.card.pad { padding: 20px; }
+
+.table-wrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 14px 18px; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--border); }
+.table th { font-size: 12px; color: var(--text-light); background: var(--surface-2); }
+.table tbody tr:last-child td { border-bottom: 0; }
+
+.btn {
+  display: inline-block;
+  padding: 11px 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+  font: inherit;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover { background: var(--surface-2); }
+.btn:focus-visible { outline: none; box-shadow: var(--focus); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: white; }
+.btn.primary:hover { background: var(--primary-dark); }
+.btn.kicsi { padding: 5px 12px; font-size: 12px; margin-top: 6px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  background: var(--surface-2);
+  color: var(--text-light);
+}
+.status-new { background: var(--primary-soft); color: var(--primary); }
+.status-draft { background: #e5e7eb; color: #374151; }
+.status-wait { background: var(--orange-soft); color: var(--orange-text); }
+.status-scheduled { background: var(--cyan-soft); color: var(--cyan-text); }
+.status-inprogress { background: var(--primary-soft); color: var(--primary-dark); }
+.status-completed { background: var(--green-soft); color: var(--green-text); }
+.status-failed { background: var(--red-soft); color: var(--red-text); }
+
+.uzenet { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; }
+.uzenet-hiba { background: var(--red-soft); color: var(--red-text); }
+.uzenet-ok { background: var(--green-soft); color: var(--green-text); }
+
+
+/* =========================================
+   KIVÉTELEZÉS
+========================================= */
+
+.projekt-fej { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+
+.tetel-fej { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 58px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.pick + .pick { margin-top: 8px; }
+.pick:hover { background: var(--surface-2); }
+.pick:has(input:focus-visible) { box-shadow: var(--focus); }
+.pick input { width: 26px; height: 26px; flex: none; accent-color: var(--green); cursor: pointer; }
+.pick-szoveg { flex: 1; }
+.pick-db { font-weight: bold; font-size: 16px; white-space: nowrap; }
+.pick.kesz { background: var(--green-soft); border-color: #86efac; }
+.pick.kesz .pick-szoveg { text-decoration: line-through; text-decoration-color: rgba(21, 128, 61, .5); }
+
+.muvelet-sor {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 0;
+  background: linear-gradient(to top, var(--background) 70%, transparent);
+}
+.muvelet-sor .haladas { margin-right: auto; }
+
+.kesz-lista { list-style: none; margin: 10px 0 16px; }
+.kesz-lista li { padding: 6px 0; border-bottom: 1px solid var(--border); }
+
+
+/* =========================================
+   ÚTVONAL
+========================================= */
+
+.lepesek { list-style: none; margin-top: 14px; }
+.lepes + .lepes { margin-top: 8px; }
+.lepes .pick + .pick { margin-top: 0; }
+
+.sorszam {
+  flex: none;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold;
+}
+
+.terkep {
+  display: grid;
+  grid-template-columns: 70px repeat(var(--oszlopok), minmax(64px, 1fr));
+  gap: 6px;
+  margin: 14px 0 10px;
+  overflow-x: auto;
+}
+.terkep-fej, .terkep-sor { font-size: 12px; color: var(--text-light); align-self: center; }
+.terkep-fej { text-align: center; }
+.cella {
+  min-height: 52px;
+  display: flex; flex-wrap: wrap; gap: 4px;
+  align-items: center; justify-content: center;
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.cella.erintett { border-style: solid; border-color: var(--primary); background: var(--primary-soft); }
+.jelolo {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--primary); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+
+
+/* =========================================
+   ÜZENETEK, ÁLLAPOTOK
+========================================= */
+
+dialog {
+  margin: auto;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  max-width: min(520px, calc(100vw - 32px));
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .3);
+}
+dialog::backdrop { background: rgba(17, 24, 39, .55); }
+.modal-doboz { padding: 22px; }
+.modal-doboz h2 { font-size: 18px; margin-bottom: 10px; }
+.modal-gombok { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+.toasts { position: fixed; right: 20px; bottom: 20px; z-index: 50; display: flex; flex-direction: column; gap: 8px; max-width: min(420px, calc(100vw - 40px)); }
+.toast { padding: 12px 16px; border-radius: 8px; background: #111827; color: white; box-shadow: 0 6px 20px rgba(0, 0, 0, .25); }
+.toast-hiba { background: var(--red-text); }
+
+.nincs-jog { margin-left: 0; padding: 48px 20px; max-width: 560px; margin-inline: auto; }
+.nincs-jog h1 { font-size: 20px; margin-bottom: 12px; }
+
+
+/* =========================================
+   MOBIL / TABLET
+========================================= */
+
+@media (max-width: 860px) {
+  .app { flex-direction: column; }
+
+  .sidebar { position: static; width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; overflow: visible; }
+  .logo { height: 64px; padding: 0 16px; border-bottom: 0; }
+  .navigation { display: flex; gap: 6px; padding: 0 12px 12px; width: 100%; order: 3; overflow-x: auto; }
+  .nav-item { width: auto; margin: 0; padding: 10px 14px; }
+  .nav-icon { margin-right: 6px; }
+  .sidebar-bottom { margin: 0 0 0 auto; padding: 8px 12px; border: 0; display: flex; align-items: center; gap: 8px; }
+  .sidebar-bottom .nav-item { width: auto; margin: 0; }
+  .sidebar-bottom .nav-icon + span { display: none; }
+  .mode-badge { margin: 0; }
+
+  .main-content { margin-left: 0; }
+  .topbar { padding: 14px 16px; min-height: 0; }
+  .user-details { display: none; }
+  .page { padding: 18px 14px 40px; }
+  .table th, .table td { padding: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
