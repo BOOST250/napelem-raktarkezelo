@@ -64,7 +64,26 @@ jobs:
           php -l "$P/config/database.local.php"
           find "$P" -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 
+          # A domain gyökere (htdocs/) különben az InfinityFree alapoldalát
+          # mutatja – innen egyből a belépő oldalra küldjük a látogatót.
+          mkdir -p build/root
+          cat > build/root/index.php <<'PHP'
+          <?php
+          header('Location: /napelem/belepes/', true, 302);
+          exit;
+          PHP
+          php -l build/root/index.php
+
       - name: FTP-feltöltés
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftpupload.net
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: build/root/
+          server-dir: htdocs/
+
+      - name: FTP-feltöltés (napelem)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftpupload.net

@@ -11,7 +11,7 @@ PHP + MySQL backend, sima HTML/CSS/JavaScript felületek, keretrendszer nélkül
 | `Közös/belepes/` | Közös belépő oldal – szerepkör alapján a megfelelő felületre visz | közös |
 | `Szakemberi Felület - Attila/beadandoszoft/` | Szakemberi felület (projektek) | Attila |
 | `Raktárvezetői felület - Én/raktarvezeto/` | Raktárvezetői felület (alkatrészek, rekeszek, bevételezés) | Ábel |
-| `Raktárosi Felület -Ivett/` | Raktárosi felület (fejlesztés alatt) | Ivett |
+| `Raktárosi Felület -Ivett/` | Raktárosi felület (projektek, kivételezés, útvonal) | Ivett |
 
 ## Futtatás (XAMPP)
 
@@ -30,4 +30,4 @@ PHP + MySQL backend, sima HTML/CSS/JavaScript felületek, keretrendszer nélkül
 
 A felhasználókat az adminisztrátor veszi fel (`users` tábla); regisztráció nincs. A jelszavakat a backend hash-elve tárolja.
 
-A raktárvezetői felület backend nélkül, demo módban is kipróbálható – lásd [a felület README-jét](<Raktárvezetői felület - Én/raktarvezeto/README.md>).
+A raktárvezetői és a raktárosi felület backend nélkül, demo módban is kipróbálható – lásd a felületek README-jét ([raktárvezető](<Raktárvezetői felület - Én/raktarvezeto/README.md>), [raktáros](<Raktárosi Felület -Ivett/README.md>)).
