@@ -65,6 +65,11 @@ const ALLAPOT_SUGO = {
 // Ezekben az állapotokban szerkeszthető még az alkatrészigény
 const SZERKESZTHETO_ALLAPOTOK = ["New", "Draft", "Wait"];
 
+// Csak a még el nem kezdett projekt törölhető: az ütemezett, folyamatban
+// lévő és lezárt projektek állapotnaplója (project_history) a statisztikákhoz
+// kell, a törlés pedig azt is vinné (ON DELETE CASCADE). A backend is ellenőrzi.
+const TOROLHETO_ALLAPOTOK = ["New", "Draft", "Wait"];
+
 
 /* =====================================
    SEGÉDFÜGGVÉNYEK
@@ -258,6 +263,12 @@ function renderStatusz() {
                 (tiltva ? ' disabled title="Előbb vegyél fel legalább egy alkatrészt."' : "") +
                 ">" + esc(lepes.felirat) + "</button>";
         }).join("");
+    }
+
+    if (TOROLHETO_ALLAPOTOK.includes(projekt.status)) {
+        hely.insertAdjacentHTML("beforeend",
+            '<button type="button" class="secondary-button torles-gomb" id="deleteProjectButton">' +
+            "Projekt törlése</button>");
     }
 
     // A munkaadatokat csak folyamatban lévő projektnél engedjük rögzíteni
@@ -455,6 +466,29 @@ async function statuszValtas(cel) {
 }
 
 
+async function projektTorles() {
+    uzenet("statusMessage", "", false);
+    const nev = [projekt.customer_name, projekt.location].filter(Boolean).join(" – ") || ("#" + projektId);
+    const tetelSzoveg = tetelek.length
+        ? "\n\nA projekt " + tetelek.length + " alkatrésztétele is törlődik, a foglalások felszabadulnak."
+        : "";
+    if (!confirm("Biztosan törlöd ezt a projektet?\n\n" + nev + tetelSzoveg +
+                 "\n\nA törlés nem vonható vissza.")) {
+        return;
+    }
+
+    const gomb = document.getElementById("deleteProjectButton");
+    if (gomb) gomb.disabled = true;
+    try {
+        await Api.torolProjekt(projektId);
+        window.location.replace("projects.html?torolve=" + encodeURIComponent(nev));
+    } catch (hiba) {
+        uzenet("statusMessage", hiba.message, true);
+        if (gomb) gomb.disabled = false;
+    }
+}
+
+
 async function munkaMentes() {
     const ora = document.getElementById("workHours").value.trim();
     const dij = document.getElementById("laborCost").value.trim();
@@ -528,6 +562,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("statusActions")
         .addEventListener("click", function (e) {
+            if (e.target.closest("#deleteProjectButton")) { projektTorles(); return; }
             const gomb = e.target.closest("[data-statusz]");
             if (gomb && !gomb.disabled) statuszValtas(gomb.dataset.statusz);
         });

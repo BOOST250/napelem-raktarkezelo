@@ -406,3 +406,14 @@
     }
 
 }
+
+/* Projekt törlése: veszélyes művelet, ezért piros, és a sor végére kerül */
+.torles-gomb {
+    margin-left: auto;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+.torles-gomb:hover:not(:disabled) {
+    background: #fef2f2;
+    color: #991b1b;
+}

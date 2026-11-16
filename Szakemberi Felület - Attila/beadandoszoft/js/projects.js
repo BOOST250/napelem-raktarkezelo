@@ -269,6 +269,22 @@ document.addEventListener(
     function () {
 
 
+        // Visszajelzés, ha a projekt oldaláról törlés után érkeztünk ide
+        const torolve = new URLSearchParams(window.location.search).get("torolve");
+        if (torolve) {
+            const jelzes = document.createElement("div");
+            jelzes.setAttribute("role", "status");
+            jelzes.textContent = "A projekt törölve: " + torolve;
+            jelzes.style.cssText = "position:fixed;top:20px;right:20px;z-index:1000;" +
+                "padding:12px 18px;border-radius:10px;background:#ecfdf5;color:#065f46;" +
+                "border:1px solid #a7f3d0;box-shadow:0 6px 20px rgba(0,0,0,.12);font-weight:600;";
+            document.body.appendChild(jelzes);
+            setTimeout(function () { jelzes.remove(); }, 5000);
+            // frissítéskor ne jelenjen meg újra
+            history.replaceState(null, "", window.location.pathname);
+        }
+
+
         // Projektek betöltése és megjelenítése
 
         loadProjects();

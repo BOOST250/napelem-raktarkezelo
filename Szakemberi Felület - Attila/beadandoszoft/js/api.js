@@ -175,6 +175,7 @@ const Api = (() => {
   const modositProjekt = (id, adat) => hiv('PUT', `/projects.php?id=${encodeURIComponent(id)}`, adat);
 
   const projektStatusz = (id, status) => modositProjekt(id, { status });
+  const torolProjekt = id => hiv('DELETE', `/projects.php?id=${encodeURIComponent(id)}`);
 
   async function projektTortenet(id) {
     const keresett = Number(id);
@@ -290,6 +291,7 @@ const Api = (() => {
     ujProjekt,
     modositProjekt,
     projektStatusz,
+    torolProjekt,
     projektTortenet,
 
     alkatreszek,
