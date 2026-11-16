@@ -13,20 +13,8 @@ PHP + MySQL backend, sima HTML/CSS/JavaScript felületek, keretrendszer nélkül
 | `Raktárvezetői felület - Én/raktarvezeto/` | Raktárvezetői felület (alkatrészek, rekeszek, bevételezés) | Ábel |
 | `Raktárosi Felület -Ivett/` | Raktárosi felület (projektek, kivételezés, útvonal) | Ivett |
 
-## Futtatás (XAMPP)
-
-1. Indítsd el az Apache-t és a MySQL-t a XAMPP-ban.
-2. phpMyAdminban importáld a `napelemrendszer.sql`-t, utána a `napelemrendszer_illesztes.sql`-t.
-3. Másold a `napelem` mappát a `C:\xampp\htdocs\` alá, és mellé (a `napelem` mappán belülre) a felületeket ezekkel a nevekkel:
-   ```
-   htdocs/napelem/
-   ├── api/  auth/  config/        (backend)
-   ├── belepes/                    ← Közös/belepes
-   ├── szakember/                  ← Szakemberi Felület - Attila/beadandoszoft
-   ├── raktarvezeto/               ← Raktárvezetői felület - Én/raktarvezeto
-   └── raktaros/                   ← Raktárosi Felület -Ivett
-   ```
-4. Nyisd meg: https://solarpanel.infinityfree.io/napelem/belepes/
+Futtatás:
+Nyisd meg: https://solarpanel.infinityfree.io/napelem/belepes/
 
 A felhasználókat az adminisztrátor veszi fel (`users` tábla); regisztráció nincs. A jelszavakat a backend hash-elve tárolja.
 
