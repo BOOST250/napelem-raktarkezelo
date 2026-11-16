@@ -26,7 +26,7 @@ PHP + MySQL backend, sima HTML/CSS/JavaScript felületek, keretrendszer nélkül
    ├── raktarvezeto/               ← Raktárvezetői felület - Én/raktarvezeto
    └── raktaros/                   ← Raktárosi Felület -Ivett
    ```
-4. Nyisd meg: <http://localhost/napelem/belepes/>
+4. Nyisd meg: https://solarpanel.infinityfree.io/napelem/belepes/
 
 A felhasználókat az adminisztrátor veszi fel (`users` tábla); regisztráció nincs. A jelszavakat a backend hash-elve tárolja.
 
