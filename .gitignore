@@ -5,6 +5,8 @@
 *.pod
 *.png
 Közös/*.txt
+# Kivétel: az egyesített mérföldkő-terv (ProjectLibre) fent van a repóban
+!Közös/projektterv/merfoldkovek_egyesitett.pod
 
 # Helyi eszközbeállítások
 .claude/
