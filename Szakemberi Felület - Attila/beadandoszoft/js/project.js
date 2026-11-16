@@ -65,10 +65,10 @@ const ALLAPOT_SUGO = {
 // Ezekben az állapotokban szerkeszthető még az alkatrészigény
 const SZERKESZTHETO_ALLAPOTOK = ["New", "Draft", "Wait"];
 
-// Csak a még el nem kezdett projekt törölhető: az ütemezett, folyamatban
-// lévő és lezárt projektek állapotnaplója (project_history) a statisztikákhoz
-// kell, a törlés pedig azt is vinné (ON DELETE CASCADE). A backend is ellenőrzi.
-const TOROLHETO_ALLAPOTOK = ["New", "Draft", "Wait"];
+// Bármilyen állapotú projekt törölhető. A törlés az alkatrésztételeket és az
+// állapotnaplót (project_history) is viszi (ON DELETE CASCADE), ezért az
+// elindult / lezárt projekteknél a megerősítés külön figyelmeztet erre.
+const NAPLOS_ALLAPOTOK = ["Scheduled", "InProgress", "Completed", "Failed"];
 
 
 /* =====================================
@@ -265,11 +265,9 @@ function renderStatusz() {
         }).join("");
     }
 
-    if (TOROLHETO_ALLAPOTOK.includes(projekt.status)) {
-        hely.insertAdjacentHTML("beforeend",
-            '<button type="button" class="secondary-button torles-gomb" id="deleteProjectButton">' +
-            "Projekt törlése</button>");
-    }
+    hely.insertAdjacentHTML("beforeend",
+        '<button type="button" class="secondary-button torles-gomb" id="deleteProjectButton">' +
+        "Projekt törlése</button>");
 
     // A munkaadatokat csak folyamatban lévő projektnél engedjük rögzíteni
     const munkaMehet = projekt.status === "InProgress";
@@ -472,7 +470,11 @@ async function projektTorles() {
     const tetelSzoveg = tetelek.length
         ? "\n\nA projekt " + tetelek.length + " alkatrésztétele is törlődik, a foglalások felszabadulnak."
         : "";
-    if (!confirm("Biztosan törlöd ezt a projektet?\n\n" + nev + tetelSzoveg +
+    const naploSzoveg = NAPLOS_ALLAPOTOK.includes(projekt.status)
+        ? "\n\nFIGYELEM: a projekt már " + (STATUSZ_NEV[projekt.status] || projekt.status).toLowerCase() +
+          " állapotú – az állapotnaplója is törlődik, a statisztikákból is eltűnik."
+        : "";
+    if (!confirm("Biztosan törlöd ezt a projektet?\n\n" + nev + tetelSzoveg + naploSzoveg +
                  "\n\nA törlés nem vonható vissza.")) {
         return;
     }

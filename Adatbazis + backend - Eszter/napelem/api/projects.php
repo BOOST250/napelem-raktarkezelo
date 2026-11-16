@@ -159,11 +159,11 @@ if ($method === 'DELETE') {
 
     $id = intval($_GET['id']);
 
-    // Törölni csak a szakember tud, és csak még el nem kezdett projektet:
-    // a többi állapotnaplója (project_history) a statisztikákhoz kell.
+    // Törölni csak a szakember tud (bármilyen állapotú projektet; az
+    // alkatrésztételek és az állapotnapló ON DELETE CASCADE-del törlődnek).
     kotelezo_bejelentkezes(['specialist']);
 
-    $check = $conn->prepare("SELECT id, status FROM projects WHERE id = ?");
+    $check = $conn->prepare("SELECT id FROM projects WHERE id = ?");
     $check->bind_param("i", $id);
     $check->execute();
     $result = $check->get_result();
@@ -173,14 +173,7 @@ if ($method === 'DELETE') {
         echo json_encode(["error" => "Nincs ilyen projekt!"]);
         exit;
     }
-    $sor = $result->fetch_assoc();
     $check->close();
-
-    if (!in_array($sor['status'], ['New', 'Draft', 'Wait'], true)) {
-        http_response_code(409);
-        echo json_encode(["error" => "Csak új, tervezet vagy várakozó projekt törölhető. Az ütemezett, folyamatban lévő és lezárt projektek naplója a statisztikákhoz kell."], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
 
     $stmt = $conn->prepare("DELETE FROM projects WHERE id = ?");
     $stmt->bind_param("i", $id);
