@@ -22,8 +22,8 @@ A felület csak bejelentkezés után érhető el, és csak **raktárvezető** (`
 | Felhasználónév | Jelszó | Szerepkör | Beléphet? |
 |---|---|---|---|
 | `raktarvezeto1` | `ABC1234` | Raktárvezető | igen |
-| `szakember1` | `ABC123` | Szakember | nem – jogosultsági hiba |
-| `raktaros1` | `ABC12345` | Raktáros | nem – jogosultsági hiba |
+| `szakember1` | `ABC123` | Szakember | igen |
+| `raktaros1` | `ABC12345` | Raktáros | igen |
 
 A demo munkamenet a localStorage-ban van, a „Demo adatok visszaállítása” nem jelentkeztet ki.
 
